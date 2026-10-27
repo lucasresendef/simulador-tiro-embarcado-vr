@@ -253,7 +253,7 @@ public class PhantomEngineCore
         else { backVolume = sideVolume = frontVolume = 0f; interiorVolume = 1f; exteriorVolume = 0f; }
 
         //-------------------PITCH
-        float speedFactor = ((coreRPM + (controller.helicopter.velocity.magnitude * 1.943f) + 10f) - functionalRPM * (idlePercentage / 100f)) / (functionalRPM - functionalRPM * (idlePercentage / 100f));
+        float speedFactor = ((coreRPM + (controller.helicopter.linearVelocity.magnitude * 1.943f) + 10f) - functionalRPM * (idlePercentage / 100f)) / (functionalRPM - functionalRPM * (idlePercentage / 100f));
 
         pitchTarget = 0.35f + (0.7f * speedFactor);
         if (fuelFactor < 1) { overidePitch = pitchTarget; } else { overidePitch = fuelFactor * Mathf.Lerp(overidePitch, pitchTarget, Time.fixedDeltaTime * 0.5f); }

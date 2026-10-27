@@ -83,8 +83,8 @@ public class PhantomBody : MonoBehaviour {
 	{
 		if (controller != null)
 		{
-			airspeed = helicopter.velocity.magnitude; knotSpeed = airspeed * 1.944f;
-			Vector3 dragForce = -helicopter.velocity; dragForce.Normalize();
+			airspeed = helicopter.linearVelocity.magnitude; knotSpeed = airspeed * 1.944f;
+			Vector3 dragForce = -helicopter.linearVelocity; dragForce.Normalize();
 
 			if (airspeed > 0)
 			{
@@ -96,7 +96,7 @@ public class PhantomBody : MonoBehaviour {
 			if (totalDrag > 0) { helicopter.AddForce(dragForce, ForceMode.Force); }
 
 
-			Vector3 relativeVelocity = transform.InverseTransformDirection(helicopter.velocity + controller.baseWind);
+			Vector3 relativeVelocity = transform.InverseTransformDirection(helicopter.linearVelocity + controller.baseWind);
 
 			longitudinalDrag = 0.5f * 0.04f * 1.225f * frontalArea * relativeVelocity.z * relativeVelocity.z;
 			lateralDrag = 0.5f * 0.42f * 1.225f * rightArea * relativeVelocity.x * relativeVelocity.z;

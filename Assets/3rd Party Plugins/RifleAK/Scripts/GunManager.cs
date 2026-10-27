@@ -6,6 +6,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 public enum ShootType
 {
     Bullet,
@@ -15,8 +17,8 @@ public enum ShootType
 public abstract class GunManager : MonoBehaviour
 {
     public Transform BulletInstantiatePos;
-    public XRGrabInteractable GrabInteractable;
-    public XRSocketInteractor MagSocket;
+    public UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable GrabInteractable;
+    public UnityEngine.XR.Interaction.Toolkit.Interactors.XRSocketInteractor MagSocket;
     public AudioSource AudioSource;
     public AudioClip ShotSFX;
 
@@ -28,7 +30,7 @@ public abstract class GunManager : MonoBehaviour
     public ShootType ShootingType;
 
     public MagazineSpawner MagazineSpawner;
-    public XRGrabInteractable WeaponMagazine;
+    public UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable WeaponMagazine;
 
 
     [Header("Bullet Settings")]
@@ -56,7 +58,7 @@ public abstract class GunManager : MonoBehaviour
 
     public virtual void GunSelectEntered(SelectEnterEventArgs arg0)
     {
-        if (MagazineSpawner != null && arg0.interactorObject.transform.TryGetComponent(out XRDirectInteractor component))
+        if (MagazineSpawner != null && arg0.interactorObject.transform.TryGetComponent(out UnityEngine.XR.Interaction.Toolkit.Interactors.XRDirectInteractor component))
             MagazineSpawner.currentMagazine = WeaponMagazine;
     }
 

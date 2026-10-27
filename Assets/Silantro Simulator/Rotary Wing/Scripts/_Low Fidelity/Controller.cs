@@ -316,7 +316,7 @@ namespace Oyedoyin.Rotary.LowFidelity
             direction = mainRotorDirection == RotationDirection.CCW ? 1 : -1f;
             Vector3 inertiaTensor = new Vector3(xInertia, yInertia, zInertia);
             helicopter.inertiaTensor = inertiaTensor;
-            helicopter.angularDrag = rotationDrag;
+            helicopter.angularDamping = rotationDrag;
             helicopter.maxAngularVelocity = maxAngularSpeed;
 
             //----------------------------------------Setup Sounds
@@ -518,12 +518,12 @@ namespace Oyedoyin.Rotary.LowFidelity
             δv = inflowCorrection.Evaluate(vz) / inflowCorrection.Evaluate(0);
 
 
-            Vector3 m_localflow = transform.InverseTransformDirection(helicopter.velocity);
+            Vector3 m_localflow = transform.InverseTransformDirection(helicopter.linearVelocity);
             Vector3 m_angular_velocity = transform.InverseTransformDirection(helicopter.angularVelocity);
             m_pitchrate = (float)Math.Round((-m_angular_velocity.x * Mathf.Rad2Deg), 2);
             m_yawrate = (float)Math.Round((m_angular_velocity.y * Mathf.Rad2Deg), 2);
             m_rollrate = (float)Math.Round((-m_angular_velocity.z * Mathf.Rad2Deg), 2);
-            m_vertical_speed = (float)Math.Round(helicopter.velocity.y, 2);
+            m_vertical_speed = (float)Math.Round(helicopter.linearVelocity.y, 2);
             float m_turn_radius = (Mathf.Approximately(m_angular_velocity.x, 0.0f)) ? float.MaxValue : m_localflow.z / m_angular_velocity.x;
             float m_turn_force = (Mathf.Approximately(m_turn_radius, 0.0f)) ? 0.0f : (m_localflow.z * m_localflow.z) / m_turn_radius;
             float m_bg = m_turn_force / -9.81f; m_bg += transform.up.y * (Physics.gravity.y / -9.81f);
@@ -574,9 +574,9 @@ namespace Oyedoyin.Rotary.LowFidelity
             }
             else if (m_type == ModelType.Arcade)
             {
-                if (helicopter.velocity.y < 0)
+                if (helicopter.linearVelocity.y < 0)
                 {
-                    m_balance_force = helicopter.mass * (Physics.gravity.y * -1) * (m_collective_balance * m_collective_power * coreFactor) * (1 + Mathf.Abs(helicopter.velocity.y));
+                    m_balance_force = helicopter.mass * (Physics.gravity.y * -1) * (m_collective_balance * m_collective_power * coreFactor) * (1 + Mathf.Abs(helicopter.linearVelocity.y));
                     helicopter.AddRelativeForce(new Vector3(0, m_balance_force, 0));
                 }
                 if (m_press_climb == true)
@@ -593,8 +593,8 @@ namespace Oyedoyin.Rotary.LowFidelity
 
                 float m_climb_limit = maximumClimbRate / MathBase.toFtMin;
                 float m_decent_limit = maximumDecentSpeed / MathBase.toFtMin;
-                if (helicopter.velocity.y > m_climb_limit) { helicopter.velocity = new Vector3(helicopter.velocity.x, m_climb_limit, helicopter.velocity.z); }
-                if (helicopter.velocity.y < -m_decent_limit) { helicopter.velocity = new Vector3(helicopter.velocity.x, -m_decent_limit, helicopter.velocity.z); }
+                if (helicopter.linearVelocity.y > m_climb_limit) { helicopter.linearVelocity = new Vector3(helicopter.linearVelocity.x, m_climb_limit, helicopter.linearVelocity.z); }
+                if (helicopter.linearVelocity.y < -m_decent_limit) { helicopter.linearVelocity = new Vector3(helicopter.linearVelocity.x, -m_decent_limit, helicopter.linearVelocity.z); }
             }
 
 
@@ -661,7 +661,7 @@ namespace Oyedoyin.Rotary.LowFidelity
             // ------------------------------------------ Volume
             if (cameraState == CameraState.Exterior) { exteriorVolume = corePower * 0.6f; interiorVolume = 0f; }
             if (cameraState == CameraState.Interior) { interiorVolume = corePower * 0.6f; exteriorVolume = 0f; }
-            float speedFactor = ((coreRPM + (helicopter.velocity.magnitude * 1.943f) + 10f) - functionalRPM * (idlePercentage / 100f)) / (functionalRPM - functionalRPM * (idlePercentage / 100f));
+            float speedFactor = ((coreRPM + (helicopter.linearVelocity.magnitude * 1.943f) + 10f) - functionalRPM * (idlePercentage / 100f)) / (functionalRPM - functionalRPM * (idlePercentage / 100f));
             pitchTarget = 0.35f + (0.7f * speedFactor);
             if (fuelFactor < 1) { overidePitch = pitchTarget; } else { overidePitch = fuelFactor * Mathf.Lerp(overidePitch, pitchTarget, Time.fixedDeltaTime * 0.5f); }
             pitchTarget *= fuelFactor; backSource.pitch = overidePitch;

@@ -279,7 +279,7 @@ public class PhantomMachineGun : MonoBehaviour
 			muzzle += 1;
 			if (muzzle > (muzzles.Length - 1)) { muzzle = 0; }
 			currentMuzzle = muzzles[muzzle]; fireTimer = 0f;
-			if (controller.helicopter != null) { baseVelocity = controller.helicopter.velocity; }
+			if (controller.helicopter != null) { baseVelocity = controller.helicopter.linearVelocity; }
 
 			// --------------------------------------------------REDUCE AMMO COUNT
 			if (!unlimitedAmmo) { currentAmmo--; }
@@ -371,7 +371,7 @@ public class PhantomMachineGun : MonoBehaviour
 			if (ejectShells && bulletCase != null)
 			{
 				GameObject shellGO = Instantiate(bulletCase, shellEjectPoint.position, shellEjectPoint.rotation) as GameObject;
-				shellGO.GetComponent<Rigidbody>().velocity = baseVelocity;
+				shellGO.GetComponent<Rigidbody>().linearVelocity = baseVelocity;
 				shellGO.GetComponent<Rigidbody>().AddRelativeForce(new Vector3(shellSpitForce + UnityEngine.Random.Range(0, shellForceRandom), 0, 0), ForceMode.Impulse);
 				shellGO.GetComponent<Rigidbody>().AddRelativeTorque(new Vector3(shellSpitTorqueX + UnityEngine.Random.Range(-shellTorqueRandom, shellTorqueRandom), shellSpitTorqueY + UnityEngine.Random.Range(-shellTorqueRandom, shellTorqueRandom), 0), ForceMode.Impulse);
 			}

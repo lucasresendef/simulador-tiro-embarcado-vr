@@ -3,13 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class Magazine : MonoBehaviour
 {
     public int MaxBulletNumber = 20;
     public int BulletNumber;
     public bool IsEmpty=false;
-    private XRGrabInteractable interactable;
+    private UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable interactable;
     public InteractionLayerMask InPocket;
     public InteractionLayerMask Default;
 
@@ -19,7 +21,7 @@ public class Magazine : MonoBehaviour
     }
     private void Awake()
     {
-        interactable = GetComponent<XRGrabInteractable>();
+        interactable = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
     }
 
     private void OnEnable()

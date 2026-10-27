@@ -35,7 +35,7 @@ public class PhantomHelper
     {
         if (craft != null)
         {
-            craft.velocity = Vector3.zero;
+            craft.linearVelocity = Vector3.zero;
             craft.angularVelocity = Vector3.zero;
             craft.transform.position = controller.basePosition;
             craft.transform.rotation = controller.baseRotation;
@@ -64,7 +64,7 @@ public class PhantomHelper
     {
         Vector3 initialPosition = craft.transform.position;
         craft.transform.position = new Vector3(initialPosition.x, controller.startAltitude, initialPosition.z);
-        craft.velocity = craft.transform.forward * controller.startSpeed;
+        craft.linearVelocity = craft.transform.forward * controller.startSpeed;
     }
 
 

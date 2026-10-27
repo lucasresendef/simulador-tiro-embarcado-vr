@@ -283,7 +283,7 @@ public class PhantomFlightComputer : MonoBehaviour
             // --------------------------------------------- Collect Performance Data
             currentAltitude = core.currentAltitude;
             currentClimbRate = core.verticalSpeed;
-            currentSpeed = Vector3.Dot(controller.transform.forward, controller.helicopter.velocity);
+            currentSpeed = Vector3.Dot(controller.transform.forward, controller.helicopter.linearVelocity);
             currentHeading = core.headingDirection; if (currentHeading > 180) { currentHeading -= 360f; }
             currentDriftSpeed = core.driftSpeed;
 

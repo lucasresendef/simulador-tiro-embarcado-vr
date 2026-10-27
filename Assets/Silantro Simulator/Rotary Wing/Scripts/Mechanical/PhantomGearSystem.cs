@@ -127,13 +127,13 @@ public class PhantomGearSystem : MonoBehaviour
 
 
 			if (invertAxleRotation) { currentSteerAngle *= -1f; }
-			if (helicopter != null) { helicopterSpeed = helicopter.velocity.magnitude; }
+			if (helicopter != null) { helicopterSpeed = helicopter.linearVelocity.magnitude; }
 
 
 			//--------------------- Brake Force
 			if (controller.helicopter != null)
 			{
-				Vector3 brakeForce = -controller.helicopter.velocity * brakeInput * brakeTorque;
+				Vector3 brakeForce = -controller.helicopter.linearVelocity * brakeInput * brakeTorque;
 				controller.helicopter.AddForce(brakeForce, ForceMode.Force);
 			}
 

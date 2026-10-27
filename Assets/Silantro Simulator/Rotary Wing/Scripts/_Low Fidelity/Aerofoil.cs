@@ -44,7 +44,7 @@ namespace Oyedoyin.Rotary.LowFidelity
                 dragCoefficient = airfoil.dragCurve.Evaluate(α);
                 Lift = localFlow.sqrMagnitude * liftCoefficient * area * -Mathf.Sign(localFlow.y);
                 Drag = localFlow.sqrMagnitude * dragCoefficient * area;
-                liftDirection = Vector3.Cross(helicopter.velocity, transform.right).normalized;
+                liftDirection = Vector3.Cross(helicopter.linearVelocity, transform.right).normalized;
                 helicopter.AddForceAtPosition(liftDirection * Lift, transform.position, ForceMode.Force);
                 helicopter.AddForceAtPosition(-localFlow.normalized * Drag, transform.position, ForceMode.Force);
             }

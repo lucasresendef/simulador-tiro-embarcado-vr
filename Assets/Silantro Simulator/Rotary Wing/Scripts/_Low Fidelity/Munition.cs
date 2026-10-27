@@ -100,14 +100,14 @@ namespace Oyedoyin.Rotary.LowFidelity
 		public void FireMunition(Transform markedTarget, string ID)
 		{
 			Vector3 dropVelocity = Vector3.zero;
-			if (launcher != null) { dropVelocity = launcher.velocity; }
+			if (launcher != null) { dropVelocity = launcher.linearVelocity; }
 
 			active = true;
 			burnTime = 0.0f;
 			munition.transform.parent = null;
 			munition.isKinematic = false;
 			munition.useGravity = false;
-			munition.velocity = dropVelocity;
+			munition.linearVelocity = dropVelocity;
 
 			if (munitionType == MunitionType.Guided)
 			{
@@ -126,14 +126,14 @@ namespace Oyedoyin.Rotary.LowFidelity
 		public void ReleaseMunition()
 		{
 			Vector3 dropVelocity = Vector3.zero;
-			if (launcher != null) { dropVelocity = launcher.velocity; }
+			if (launcher != null) { dropVelocity = launcher.linearVelocity; }
 
 			active = true;
 			burnTime = 0.0f;
 			munition.transform.parent = null;
 			munition.isKinematic = false;
 			munition.useGravity = false;
-			munition.velocity = dropVelocity;
+			munition.linearVelocity = dropVelocity;
 			armed = true;
 		}
 
@@ -207,7 +207,7 @@ namespace Oyedoyin.Rotary.LowFidelity
 
 
 			//----------------------------------- Data
-			munitionSpeed = munition.velocity.magnitude;
+			munitionSpeed = munition.linearVelocity.magnitude;
 			if (munitionSpeed > 1)
 			{
 				float altitude = munition.gameObject.transform.position.y * 3.28084f;
@@ -247,7 +247,7 @@ namespace Oyedoyin.Rotary.LowFidelity
 
 				Vector3 thrustForce = transform.forward * thrust;
 				if (!float.IsNaN(thrust) && !float.IsInfinity(thrust)) { munition.AddForce(thrustForce, ForceMode.Force); }
-				Vector3 dragForce = munition.velocity.normalized * -drag;
+				Vector3 dragForce = munition.linearVelocity.normalized * -drag;
 				if (!float.IsNaN(drag) && !float.IsInfinity(drag)) { munition.AddForce(dragForce, ForceMode.Force); }
 			}
 		}
@@ -360,7 +360,7 @@ namespace Oyedoyin.Rotary.LowFidelity
 			}
 		}
 		IEnumerator WaitForMomentumShead(Vector3 collisionPoint, Quaternion collisionRotation) { yield return new WaitForSeconds(0.02f); Explode(collisionPoint, collisionRotation); }
-		void OnTriggerEnter(Collider other) { if (other.transform != launcher.transform && munition.velocity.magnitude > 40f) { WaitForMomentumShead(transform.position, Quaternion.identity); } }
+		void OnTriggerEnter(Collider other) { if (other.transform != launcher.transform && munition.linearVelocity.magnitude > 40f) { WaitForMomentumShead(transform.position, Quaternion.identity); } }
 		IEnumerator TimeStep(float time) { yield return new WaitForSeconds(time); armed = true; }
 
 
@@ -413,8 +413,8 @@ namespace Oyedoyin.Rotary.LowFidelity
 				if (explosionBody != null)
 				{
 					explosionBody.mass = munitionWeight;
-					explosionBody.drag = 1f;
-					explosionBody.velocity = munition.velocity;
+					explosionBody.linearDamping = 1f;
+					explosionBody.linearVelocity = munition.linearVelocity;
 				}
 				exploded = true;
 			}

@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
 
-public class PocketSocket : XRSocketInteractor
+
+public class PocketSocket : UnityEngine.XR.Interaction.Toolkit.Interactors.XRSocketInteractor
 {
     
-    public override XRBaseInteractable.MovementType? selectedInteractableMovementTypeOverride => XRBaseInteractable.MovementType.Instantaneous;
+    public override UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable.MovementType? selectedInteractableMovementTypeOverride => UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable.MovementType.Instantaneous;
 }

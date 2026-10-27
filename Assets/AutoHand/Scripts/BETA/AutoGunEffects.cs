@@ -116,11 +116,11 @@ namespace Autohand {
 
                 if(newBullet.CanGetComponent<Rigidbody>(out var body)) {
                     if(AutoHandPlayer.Instance.IsHolding(gun.grabbable))
-                        body.velocity = AutoHandPlayer.Instance.body.velocity;
+                        body.linearVelocity = AutoHandPlayer.Instance.body.linearVelocity;
                     //body.velocity += gun.grabbable.body.velocity;
                     //body.AddForce(shellEjectionDirection.forward * shellEjectionForce, ForceMode.Force);
                     // REMOVER a influência da arma
-                        body.velocity = Vector3.zero;
+                        body.linearVelocity = Vector3.zero;
                     // REDUZIR a força da ejeção
                         body.AddForce(shellEjectionDirection.forward * (shellEjectionForce * 0.1f), ForceMode.Impulse);
                 }
@@ -144,11 +144,11 @@ namespace Autohand {
 
                 if(newShell.CanGetComponent<Rigidbody>(out var body)) {
                     if(AutoHandPlayer.Instance.IsHolding(gun.grabbable))
-                        body.velocity = AutoHandPlayer.Instance.body.velocity;
+                        body.linearVelocity = AutoHandPlayer.Instance.body.linearVelocity;
                     //body.velocity += gun.grabbable.body.velocity;
                     //body.AddForce(shellEjectionDirection.forward * shellEjectionForce, ForceMode.Force);
                     // REMOVER a adição da velocidade do grabbable (arma)
-                        body.velocity = Vector3.zero;
+                        body.linearVelocity = Vector3.zero;
                         // REDUZIR a força da ejeção da cápsula
                         body.AddForce(shellEjectionDirection.forward * (shellEjectionForce * 0.1f), ForceMode.Impulse);
                 }

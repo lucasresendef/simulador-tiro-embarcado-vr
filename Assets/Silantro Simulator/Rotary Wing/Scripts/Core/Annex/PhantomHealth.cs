@@ -56,12 +56,12 @@ public class PhantomHealth : MonoBehaviour
 			if (componentType == ComponentType.Helicopter)
 			{
 				Rigidbody aircraft = GetComponent<Rigidbody>();
-				if (aircraft != null && aircraft.velocity.magnitude > 20f) { DestroyComponent(); }
+				if (aircraft != null && aircraft.linearVelocity.magnitude > 20f) { DestroyComponent(); }
 			}
 			else
 			{
 				Rigidbody component = GetComponent<Rigidbody>();
-				if (component != null && component.velocity.magnitude > 5f) { DestroyComponent(); }
+				if (component != null && component.linearVelocity.magnitude > 5f) { DestroyComponent(); }
 			}
 		}
 	}
@@ -187,7 +187,7 @@ public class PhantomHealth : MonoBehaviour
 		
 		
 		// ---------------------------------- ADD COLLIDERS TO ATTACHED PARTS
-		if (transform.root.GetComponent<Rigidbody>()) { dropVelocity = transform.root.GetComponent<Rigidbody>().velocity; }
+		if (transform.root.GetComponent<Rigidbody>()) { dropVelocity = transform.root.GetComponent<Rigidbody>().linearVelocity; }
 		foreach (Model model in attachments)
 		{
 			// ---------------------------------- ADD COLLIDER
@@ -202,7 +202,7 @@ public class PhantomHealth : MonoBehaviour
 			}
 			// ---------------------------------- SET VALUES
 			model.model.GetComponent<Rigidbody>().mass = model.weight;
-			model.model.GetComponent<Rigidbody>().velocity = dropVelocity;
+			model.model.GetComponent<Rigidbody>().linearVelocity = dropVelocity;
 		}
 
 
@@ -218,7 +218,7 @@ public class PhantomHealth : MonoBehaviour
 			{
 				gameObject.GetComponent<Rigidbody>().isKinematic = false;
 				gameObject.GetComponent<Rigidbody>().mass = 200f;
-				gameObject.GetComponent<Rigidbody>().velocity = dropVelocity;
+				gameObject.GetComponent<Rigidbody>().linearVelocity = dropVelocity;
 			}
 		}
 

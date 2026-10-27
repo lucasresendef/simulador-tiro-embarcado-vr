@@ -558,7 +558,7 @@ public class TrafficCar : MonoBehaviour
         
 
 
-        speed = myRigidbody.velocity.magnitude * 3.6f;
+        speed = myRigidbody.linearVelocity.magnitude * 3.6f;
 
         VerificaPoints();
 

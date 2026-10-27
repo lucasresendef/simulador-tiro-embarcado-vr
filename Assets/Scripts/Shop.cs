@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class Shop : MonoBehaviour
 {
@@ -16,11 +18,11 @@ public class Shop : MonoBehaviour
 
     public void BuyGun(GunManager pGunManager)
     {
-        IXRSelectInteractor temp = GetAvailablePocket();
+        UnityEngine.XR.Interaction.Toolkit.Interactors.IXRSelectInteractor temp = GetAvailablePocket();
         XRInteractionManager.SelectEnter(temp, Instantiate(pGunManager, temp.transform.position, temp.transform.rotation).GrabInteractable);
     }
 
-    public IXRSelectInteractor GetAvailablePocket()
+    public UnityEngine.XR.Interaction.Toolkit.Interactors.IXRSelectInteractor GetAvailablePocket()
     {
         foreach (var pocket in PocketSockets)
         {

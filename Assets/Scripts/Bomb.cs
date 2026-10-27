@@ -5,14 +5,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class Bomb : MonoBehaviour
 {
     public int ExplosionForce = 1000;
     private bool isPinExited=true;
     public float explodeTime;
-    public XRGrabInteractable Grab;
-    public XRSocketInteractor Socket;
+    public UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable Grab;
+    public UnityEngine.XR.Interaction.Toolkit.Interactors.XRSocketInteractor Socket;
     public ParticleSystem ExplosionEffect;
     public float ExplosionRadius = 5f;
     

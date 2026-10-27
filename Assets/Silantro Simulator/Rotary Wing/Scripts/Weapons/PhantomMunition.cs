@@ -157,7 +157,7 @@ public class PhantomMunition : MonoBehaviour
         Vector3 ejectVelocity = transform.forward * startingSpeed;
         Vector3 resultantVelocity = ejectVelocity + parentVelocity;
         //RELEASE BULLET
-        munition.velocity = resultantVelocity;
+        munition.linearVelocity = resultantVelocity;
     }
 
 
@@ -172,14 +172,14 @@ public class PhantomMunition : MonoBehaviour
         //GET VELOCITY FROM PARENT
         if (helicopter != null)
         {
-            dropVelocity = helicopter.velocity;
+            dropVelocity = helicopter.linearVelocity;
         }
         //LAUNCH ROCKET
         if (munitionType == MunitionType.Rocket)
         {
             munition.transform.parent = null;
             munition.isKinematic = false;
-            munition.velocity = dropVelocity;
+            munition.linearVelocity = dropVelocity;
             motorEngine.FireRocket();
             StartCoroutine(TimeStep(0.3f));
         }
@@ -201,7 +201,7 @@ public class PhantomMunition : MonoBehaviour
     public void FireMunition(Transform markedTarget, string ID)
     {
         //GET VELOCITY FROM PARENT
-        if (helicopter != null) { dropVelocity = helicopter.velocity; }
+        if (helicopter != null) { dropVelocity = helicopter.linearVelocity; }
         //LAUNCH ROCKET
         if (munitionType == MunitionType.Rocket)
         {
@@ -211,7 +211,7 @@ public class PhantomMunition : MonoBehaviour
                 motorEngine.FireRocket();
                 munition.transform.parent = null;
                 munition.isKinematic = false;
-                munition.velocity = dropVelocity;
+                munition.linearVelocity = dropVelocity;
                 StartCoroutine(TimeStep(0.3f));
                 //SET TARGET DATA
                 target = markedTarget;
@@ -229,7 +229,7 @@ public class PhantomMunition : MonoBehaviour
             motorEngine.FireRocket();
             munition.transform.parent = null;
             munition.isKinematic = false;
-            munition.velocity = dropVelocity;
+            munition.linearVelocity = dropVelocity;
             StartCoroutine(TimeStep(0.8f));
             //SET TARGET DATA
             target = markedTarget;
@@ -451,7 +451,7 @@ public class PhantomMunition : MonoBehaviour
 
             //FIRE TYPE
             if (fireMode == FireMode.PointFiring) { contactPosition = contact.point; }
-            if (fireMode == FireMode.ForwardFiring) { if (Physics.Raycast(transform.position, munition.velocity, out hit)) { contactPosition = hit.point; } }
+            if (fireMode == FireMode.ForwardFiring) { if (Physics.Raycast(transform.position, munition.linearVelocity, out hit)) { contactPosition = hit.point; } }
 
             //1. ---------------------------------------------------------------------------ROCKET
             if (munitionType == MunitionType.Rocket)
@@ -462,7 +462,7 @@ public class PhantomMunition : MonoBehaviour
                     Explode("Rocket Collision--Fuze MK193", contactPosition);
                 }
                 //DESTROY IF IMPACT IS STRONG ENOUGH
-                if (armed && munition.velocity.magnitude > 5)
+                if (armed && munition.linearVelocity.magnitude > 5)
                 {
                     StartCoroutine(WaitForMomentumShead("Rocket Collision Base", contactPosition));
                 }
@@ -562,7 +562,7 @@ public class PhantomMunition : MonoBehaviour
             GameObject explosion = Instantiate(explosionPrefab, collisionPosition, collisionRotation);
             explosion.SetActive(true);
             explosion.GetComponentInChildren<AudioSource>().Play();
-            if(explosion.GetComponent<Rigidbody>() != null) { explosion.GetComponent<Rigidbody>().velocity = munition.velocity; }
+            if(explosion.GetComponent<Rigidbody>() != null) { explosion.GetComponent<Rigidbody>().linearVelocity = munition.linearVelocity; }
             exploded = true;
         }
         Destroy(gameObject);
@@ -638,7 +638,7 @@ public class PhantomMunition : MonoBehaviour
             //------------------------------------------------------------------------------------------------------------------------GENERAL
             if (armed)
             {
-                speed = munition.velocity.magnitude;
+                speed = munition.linearVelocity.magnitude;
                 activeTime += Time.deltaTime;
                 distanceTraveled += speed * Time.deltaTime;
                 if (target != null) { distanceToTarget = Vector3.Distance(transform.position, target.position); }
@@ -802,7 +802,7 @@ public class PhantomMunition : MonoBehaviour
     {
         //CALCULATE BASE DATA
         currentAltitude = munition.gameObject.transform.position.y * 3.28084f;//Convert altitude from meter to feet
-        currentSpeed = munition.velocity.magnitude * 1.944f;//Speed in knots
+        currentSpeed = munition.linearVelocity.magnitude * 1.944f;//Speed in knots
                                                             //CALCULATE DENSITY
         float kelvinTemperatrue;
         kelvinTemperatrue = ambientTemperature + 273.15f;

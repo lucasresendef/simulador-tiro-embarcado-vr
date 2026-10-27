@@ -461,12 +461,12 @@ namespace Autohand {
             body.interpolation = RigidbodyInterpolation.None;
             body.solverIterations = 100;
             body.solverVelocityIterations = 100;
-            preheldDrag = body.drag;
-            preheldAngularDrag = body.angularDrag;
-            if(body.drag < minHeldDrag)
-                body.drag = minHeldDrag;
-            if(body.angularDrag < minHeldAngleDrag)
-                body.angularDrag = minHeldAngleDrag;
+            preheldDrag = body.linearDamping;
+            preheldAngularDrag = body.angularDamping;
+            if(body.linearDamping < minHeldDrag)
+                body.linearDamping = minHeldDrag;
+            if(body.angularDamping < minHeldAngleDrag)
+                body.angularDamping = minHeldAngleDrag;
 
             if(parentOnGrab) {
                 rootTransform.parent = hand.transform.parent;
@@ -476,7 +476,7 @@ namespace Autohand {
             }
 
             if(heldNoFriction)
-                SetPhysicsMateiral(Resources.Load<PhysicMaterial>("NoFriction"));
+                SetPhysicsMateiral(Resources.Load<PhysicsMaterial>("NoFriction"));
 
             if(ignoreWeight) {
                 if(!body.gameObject.CanGetComponent(out WeightlessFollower heldFollower))
@@ -559,10 +559,10 @@ namespace Autohand {
                     body.solverIterations = Physics.defaultSolverIterations;
                     body.solverVelocityIterations = Physics.defaultSolverVelocityIterations;
 
-                    if(body.drag == minHeldDrag && preheldDrag != 0)
-                        body.drag = preheldDrag;
-                    if(body.angularDrag == minHeldAngleDrag && preheldAngularDrag != 0)
-                        body.angularDrag = preheldAngularDrag;
+                    if(body.linearDamping == minHeldDrag && preheldDrag != 0)
+                        body.linearDamping = preheldDrag;
+                    if(body.angularDamping == minHeldAngleDrag && preheldAngularDrag != 0)
+                        body.angularDamping = preheldAngularDrag;
                     preheldDrag = 0;
                     preheldAngularDrag = 0;
                 }
@@ -605,7 +605,7 @@ namespace Autohand {
                 hand.Release();
                 throwPower = throwMult;
                 if(body != null)
-                    body.velocity = body.velocity.normalized * Mathf.Clamp(body.velocity.magnitude, 0, 1);
+                    body.linearVelocity = body.linearVelocity.normalized * Mathf.Clamp(body.linearVelocity.magnitude, 0, 1);
             }
             else if(beingGrabbedBy.Contains(hand))
                 hand.BreakGrabConnection();
@@ -617,7 +617,7 @@ namespace Autohand {
             if(heldBy.Contains(hand)) {
                 if (body != null){
                     body.WakeUp();
-                    body.velocity *= 0;
+                    body.linearVelocity *= 0;
                     body.angularVelocity *= 0;
                 }
 
@@ -744,7 +744,7 @@ namespace Autohand {
 
         internal void SetThrowVelocity(Vector3 throwVel, Vector3 throwAngularVel) {
             if(body != null && !body.isKinematic && heldBy.Count == 0) {
-                body.velocity = throwVel * throwPower;
+                body.linearVelocity = throwVel * throwPower;
                 if(!float.IsNaN(throwAngularVel.x) && !float.IsNaN(throwAngularVel.y) && !float.IsNaN(throwAngularVel.z))
                     body.angularVelocity = throwAngularVel;
             }

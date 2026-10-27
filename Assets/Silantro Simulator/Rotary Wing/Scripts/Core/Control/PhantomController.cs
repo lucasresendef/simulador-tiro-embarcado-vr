@@ -255,7 +255,7 @@ public class PhantomController : MonoBehaviour
                 core.helicopter = helicopter;
                 core.controller = controller;
                 core.InitializeCore();
-                initialDrag = helicopter.drag;
+                initialDrag = helicopter.linearDamping;
             }
 
 
@@ -525,11 +525,11 @@ public class PhantomController : MonoBehaviour
         if(allOk && isControllable)
         {
             // ---------------------------- Safety NEt
-            if (helicopter.velocity == Vector3.positiveInfinity) { helicopter.velocity = Vector3.zero; }
-            if (helicopter.velocity == Vector3.negativeInfinity) { helicopter.velocity = Vector3.zero; }
+            if (helicopter.linearVelocity == Vector3.positiveInfinity) { helicopter.linearVelocity = Vector3.zero; }
+            if (helicopter.linearVelocity == Vector3.negativeInfinity) { helicopter.linearVelocity = Vector3.zero; }
             if (helicopter.angularVelocity == Vector3.positiveInfinity) { helicopter.angularVelocity = Vector3.zero; }
             if (helicopter.angularVelocity == Vector3.positiveInfinity) { helicopter.angularVelocity = Vector3.zero; }
-            if (helicopter.velocity.magnitude > 500) { helicopter.velocity = Vector3.zero; helicopter.angularVelocity = Vector3.zero; }
+            if (helicopter.linearVelocity.magnitude > 500) { helicopter.linearVelocity = Vector3.zero; helicopter.angularVelocity = Vector3.zero; }
 
 
             // ---------------------------- Fuel Usage
@@ -601,6 +601,6 @@ public class PhantomController : MonoBehaviour
         // -------------------------------------------- Drag
         actuatorDrag = 0f;
         foreach (PhantomActuator actuator in actuators) { actuatorDrag += actuator.currentDragFactor; }
-        currentDrag = (initialDrag + actuatorDrag); helicopter.drag = currentDrag;
+        currentDrag = (initialDrag + actuatorDrag); helicopter.linearDamping = currentDrag;
     }
 }

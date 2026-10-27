@@ -389,7 +389,7 @@ public class PhantomDisplay : MonoBehaviour {
 					gload.text = "G-Load = " + gfore.ToString("0.00");
 				}
 
-				climb.text = "Climb = " + (m_controller.helicopter.velocity.y * Oyedoyin.MathBase.toFtMin).ToString("0.0") + " ft/min";
+				climb.text = "Climb = " + (m_controller.helicopter.linearVelocity.y * Oyedoyin.MathBase.toFtMin).ToString("0.0") + " ft/min";
 
 				//WEIGHT SETTINGS
 				float Weight = m_controller.currentWeight;

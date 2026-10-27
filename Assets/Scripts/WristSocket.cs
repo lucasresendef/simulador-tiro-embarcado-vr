@@ -4,8 +4,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
-public class WristSocket : XRSocketInteractor
+public class WristSocket : UnityEngine.XR.Interaction.Toolkit.Interactors.XRSocketInteractor
 {
     public float targetSize = 0.25f;
     public float sizingDuration = 0.25f;
@@ -20,7 +22,7 @@ public class WristSocket : XRSocketInteractor
         base.OnHoverEntering(args);
         objectSize=FindObjectSize(args.interactableObject.transform.gameObject);
         interactableHoverScale = FindTargetScale().x;
-        if (args.interactableObject.transform.GetComponent<XRGrabInteractable>().isSelected)
+        if (args.interactableObject.transform.GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>().isSelected)
             canSelect = true;
     }
     protected override void OnHoverExiting(HoverExitEventArgs args)
@@ -104,9 +106,9 @@ public class WristSocket : XRSocketInteractor
         return size;
     }
 
-    public override XRBaseInteractable.MovementType? selectedInteractableMovementTypeOverride => XRBaseInteractable.MovementType.Instantaneous;
+    public override UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable.MovementType? selectedInteractableMovementTypeOverride => UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable.MovementType.Instantaneous;
 
-    public override bool CanSelect(IXRSelectInteractable interactable)
+    public override bool CanSelect(UnityEngine.XR.Interaction.Toolkit.Interactables.IXRSelectInteractable interactable)
     {
         return base.CanSelect(interactable) && canSelect;
     }

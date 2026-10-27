@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class MagazineSpawner : MonoBehaviour
 {
-    public XRGrabInteractable currentMagazine;
-    [ReadOnlyInspector] public XRSimpleInteractable XRSimpleInteractable;
+    public UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable currentMagazine;
+    [ReadOnlyInspector] public UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable XRSimpleInteractable;
     [ReadOnlyInspector] public XRInteractionManager XRInteractionManager;
 
     [ContextMenu("GetComponents")]
@@ -29,7 +31,7 @@ public class MagazineSpawner : MonoBehaviour
     private void MagazineSpawnerGrabbed(SelectEnterEventArgs arg0)
     {
         if (currentMagazine == null) return;
-        XRGrabInteractable magazine = Instantiate(currentMagazine,transform.position,transform.rotation);
+        UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable magazine = Instantiate(currentMagazine,transform.position,transform.rotation);
         XRInteractionManager.SelectEnter(arg0.interactorObject, magazine);
     }
 }

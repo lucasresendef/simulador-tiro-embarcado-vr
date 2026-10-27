@@ -95,7 +95,7 @@ public class PhantomControlModule : MonoBehaviour
         baseTensorRotation = helicopter.inertiaTensorRotation;
         inertiaTensor = new Vector3(xInertia, yInertia, zInertia);
         helicopter.inertiaTensor = inertiaTensor;
-        helicopter.angularDrag = rotationDrag;
+        helicopter.angularDamping = rotationDrag;
         initialized = true;
     }
 
@@ -139,7 +139,7 @@ public class PhantomControlModule : MonoBehaviour
     {
         // ---------------- BASE
         bodyLinearVelocity = MathBase.TransformVelocityToBodyAxis(earthLinearVelocity, helicopter.transform);
-        Vector3 localFlow = transform.InverseTransformDirection(helicopter.velocity);
+        Vector3 localFlow = transform.InverseTransformDirection(helicopter.linearVelocity);
         driftSpeed = localFlow.x;
         Vector3 linearSpeed = new Vector3(localFlow.x, localFlow.z);
         forwardSpeed = linearSpeed.magnitude;
@@ -160,12 +160,12 @@ public class PhantomControlModule : MonoBehaviour
 
 
         // ---------------- PERFORMANCE
-        Vector3 localVelocity = transform.InverseTransformDirection(helicopter.velocity);
+        Vector3 localVelocity = transform.InverseTransformDirection(helicopter.linearVelocity);
         Vector3 localAngularVelocity = transform.InverseTransformDirection(helicopter.angularVelocity);
         pitchRate = (float)Math.Round((-localAngularVelocity.x * Mathf.Rad2Deg), 2);
         yawRate = (float)Math.Round((localAngularVelocity.y * Mathf.Rad2Deg), 2);
         rollRate = (float)Math.Round((-localAngularVelocity.z * Mathf.Rad2Deg), 2);
-        verticalSpeed = (float)Math.Round(helicopter.velocity.y, 2);
+        verticalSpeed = (float)Math.Round(helicopter.linearVelocity.y, 2);
 
         // ---------------- TURN RADIUS
         float turnRadius = (Mathf.Approximately(localAngularVelocity.x, 0.0f)) ? float.MaxValue : localVelocity.z / localAngularVelocity.x;
@@ -296,6 +296,6 @@ public class PhantomControlModule : MonoBehaviour
         Gizmos.color = Color.blue; if (emptyCenterOfMass != null) { Gizmos.DrawSphere(emptyCenterOfMass.position, 0.2f); Gizmos.DrawLine(emptyCenterOfMass.position, (emptyCenterOfMass.transform.up * 3f + emptyCenterOfMass.position)); }
         if (emptyCenterOfMass == null && currentCOM == null) { Gizmos.DrawSphere(this.transform.position, 0.2f); Gizmos.DrawLine(this.transform.position, (this.transform.transform.up * 3f + this.transform.position)); }
         Gizmos.color = Color.red; if (currentCOM != null) { Gizmos.DrawSphere(currentCOM.position, 0.2f); Gizmos.DrawLine(currentCOM.position, (currentCOM.transform.up * 3f + currentCOM.position)); }
-        Gizmos.color = Color.green; if (helicopter != null) { Gizmos.DrawLine(helicopter.transform.position, (helicopter.velocity.normalized * 5f + helicopter.position)); }
+        Gizmos.color = Color.green; if (helicopter != null) { Gizmos.DrawLine(helicopter.transform.position, (helicopter.linearVelocity.normalized * 5f + helicopter.position)); }
     }
 }

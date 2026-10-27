@@ -6,6 +6,8 @@ using UnityEngine.InputSystem;
 using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.Rendering;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class OneHandedGunManager : GunManager
 {

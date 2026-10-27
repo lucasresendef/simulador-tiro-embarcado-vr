@@ -1,16 +1,18 @@
-﻿using System;
+using System;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class LookRotator : MonoBehaviour
 {
     public Transform target = null;
-    private XRBaseInteractor interactor = null;
+    private UnityEngine.XR.Interaction.Toolkit.Interactors.XRBaseInteractor interactor = null;
 
     private void Awake()
     {
-        interactor = GetComponent<XRBaseInteractor>();
+        interactor = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactors.XRBaseInteractor>();
     }
 
     private void OnEnable()
@@ -30,7 +32,7 @@ public class LookRotator : MonoBehaviour
         interactor.selectExited.RemoveListener(ResetRotation);
     }
 
-    private void ResetRotation(XRBaseInteractable interactable)
+    private void ResetRotation(UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable interactable)
     {
         transform.localRotation = Quaternion.identity;
     }

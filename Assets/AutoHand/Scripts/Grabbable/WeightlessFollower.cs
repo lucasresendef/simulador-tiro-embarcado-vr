@@ -61,8 +61,8 @@ namespace Autohand {
 
             if(startMass == 0) {
                 startMass = body.mass;
-                startDrag = body.drag;
-                startAngleDrag = body.angularDrag;
+                startDrag = body.linearDamping;
+                startAngleDrag = body.angularDamping;
                 useGravity = body.useGravity;
             }
         }
@@ -135,8 +135,8 @@ namespace Autohand {
             startHandAngleDrag = hand.startAngularDrag;
 
             body.mass = startHandMass;
-            body.drag = startHandDrag;
-            body.angularDrag = startHandAngleDrag;
+            body.linearDamping = startHandDrag;
+            body.angularDamping = startHandAngleDrag;
             body.useGravity = false;
 
             followPositionStrength = hand.followPositionStrength;
@@ -211,10 +211,10 @@ namespace Autohand {
                 vel.y = Mathf.Clamp(vel.y, -velocityClamp, velocityClamp);
                 vel.z = Mathf.Clamp(vel.z, -velocityClamp, velocityClamp);
 
-                body.velocity = new Vector3(
-                    Mathf.MoveTowards(body.velocity.x, vel.x, minVelocityChange + Mathf.Abs(body.velocity.x) * Time.fixedDeltaTime * 60),
-                    Mathf.MoveTowards(body.velocity.y, vel.y, minVelocityChange + Mathf.Abs(body.velocity.y) * Time.fixedDeltaTime * 60),
-                    Mathf.MoveTowards(body.velocity.z, vel.z, minVelocityChange + Mathf.Abs(body.velocity.z) * Time.fixedDeltaTime * 60)
+                body.linearVelocity = new Vector3(
+                    Mathf.MoveTowards(body.linearVelocity.x, vel.x, minVelocityChange + Mathf.Abs(body.linearVelocity.x) * Time.fixedDeltaTime * 60),
+                    Mathf.MoveTowards(body.linearVelocity.y, vel.y, minVelocityChange + Mathf.Abs(body.linearVelocity.y) * Time.fixedDeltaTime * 60),
+                    Mathf.MoveTowards(body.linearVelocity.z, vel.z, minVelocityChange + Mathf.Abs(body.linearVelocity.z) * Time.fixedDeltaTime * 60)
                 );
             }
         }
@@ -237,7 +237,7 @@ namespace Autohand {
             angle = Mathf.Abs(angle);
 
             var angleStrengthOffset = 1;// Mathf.Lerp(1f, 2f, angle / 180f);
-            body.angularDrag = Mathf.Lerp(startAngleDrag + 5, startAngleDrag, angle/4f);
+            body.angularDamping = Mathf.Lerp(startAngleDrag + 5, startAngleDrag, angle/4f);
 
 
             body.angularVelocity = new Vector3(
@@ -274,8 +274,8 @@ namespace Autohand {
             if(this.follow1 == null && follow2 == null && !grab.beingGrabbed) {
                 if(body != null) {
                     body.mass = startMass;
-                    body.drag = startDrag;
-                    body.angularDrag = startAngleDrag;
+                    body.linearDamping = startDrag;
+                    body.angularDamping = startAngleDrag;
                     body.useGravity = useGravity;
                 }
                 Destroy(this);
@@ -295,8 +295,8 @@ namespace Autohand {
             if (body != null)
             {
                 body.mass = startMass;
-                body.drag = startDrag;
-                body.angularDrag = startAngleDrag;
+                body.linearDamping = startDrag;
+                body.angularDamping = startAngleDrag;
                 body.useGravity = useGravity;
             }
         }

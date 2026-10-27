@@ -324,7 +324,7 @@ public class PhantomRadar : MonoBehaviour
 							//COLLECT VARIABLES
 							if (filterbody != null)
 							{
-								objectSpeed = filterbody.velocity.magnitude;
+								objectSpeed = filterbody.linearVelocity.magnitude;
 							}
 							else { objectSpeed = 0f; }
 
@@ -366,7 +366,7 @@ public class PhantomRadar : MonoBehaviour
 			//FILTER
 			Rigidbody filterbody = lockedTarget.body.gameObject.GetComponent<Rigidbody>();
 			//COLLECT VARIABLES
-			if (filterbody != null) { lockedTarget.speed = filterbody.velocity.magnitude; }
+			if (filterbody != null) { lockedTarget.speed = filterbody.linearVelocity.magnitude; }
 			lockedTarget.altitude = lockedTarget.body.transform.position.y;
 			lockedTarget.distance = Vector3.Distance(lockedTarget.body.transform.position, this.transform.position);
 			lockedPosition = lockedTarget.body.transform.position;
