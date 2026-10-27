@@ -41,6 +41,28 @@ Se nenhum headset estiver ativo, o modo desktop liga sozinho (`Assets/TCC/ModoDe
 
 O disparo passa pelo mesmo `AutoGun` do VR, então acertos, cronômetro e pontuação são os mesmos nos dois modos.
 
+### Piloto automático
+
+Opcional, para o instrutor se concentrar no treinamento. Com **P** liga/desliga e com **O** troca o padrão de voo, todos com a porta do operador (esquerda) voltada para a área de treinamento:
+
+| Padrão | Voo |
+|---|---|
+| Órbita | Círculo em torno da área (padrão: 300 ft, raio de 60 m, 20 kt) |
+| Deslocamento linear | Circuito oval com passagens retas pela área (40 kt nas retas) |
+| Pairado | Para onde a frenagem terminar e paira |
+
+Se o motor estiver desligado, ele dá a partida e decola na vertical. A altura sobe sozinha se algum prédio ficar a menos de 20 m da trajetória. Ao desligar, a aeronave volta para a física do Silantro mantendo a velocidade. Os parâmetros ficam no componente `PilotoAutomatico` do helicóptero.
+
+### Alvos móveis
+
+Além do tambor fixo, a cena principal tem (objeto `[TCC] Treinamento`):
+
+- **Veículos** (`VeiculoAlvo`): 4 carros em dois circuitos sobre as ruas ao sul do alvo (rotas em Splines, mão direita), de 30 a 55 km/h. Atingido, o carro para por alguns segundos e retoma o percurso.
+- **Pessoas em fuga** (`PessoaEmFuga`): 6 pessoas na praça do alvo. Máquina de estados Parada → Alerta → Fugindo → Escondida → Retornando; ao perceber o helicóptero, fogem da posição prevista da aeronave pela NavMesh da área. Atingida, a pessoa cai e reaparece depois de alguns segundos.
+- **Placar** (`GerenciadorTreinamento`): disparos e acertos por tipo de alvo, no canto da tela.
+
+Para recriar o cenário (rotas, NavMesh, veículos, pessoas e piloto automático): menu **TCC → Configurar cenário de treinamento**.
+
 ### Pilotagem (Silantro)
 
 F1/F2 liga/desliga o motor, 1/2 coletivo, W/S/A/D cíclico, Q/E pedais, C troca a câmera do helicóptero, V liga a luz e **R reinicia a cena**.
