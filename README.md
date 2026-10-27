@@ -34,8 +34,8 @@ Se nenhum headset estiver ativo, o modo desktop liga sozinho (`Assets/TCC/ModoDe
 | Mirar | Mouse |
 | Atirar | Clique esquerdo |
 | Zoom | Segurar botão direito |
-| Recarregar | R |
-| Alternar para a câmera do helicóptero | V |
+| Recarregar | T |
+| Alternar para a câmera do helicóptero | H |
 | Liberar o cursor | Esc (clique para voltar) |
 | Menu inicial | Segurar botão direito para olhar; clicar nos botões |
 
@@ -43,7 +43,7 @@ O disparo passa pelo mesmo `AutoGun` do VR, então acertos, cronômetro e pontua
 
 ### Pilotagem (Silantro)
 
-F1/F2 liga/desliga o motor, 1/2 coletivo, W/S/A/D cíclico, Q/E pedais, C troca a câmera do helicóptero.
+F1/F2 liga/desliga o motor, 1/2 coletivo, W/S/A/D cíclico, Q/E pedais, C troca a câmera do helicóptero, V liga a luz e **R reinicia a cena**.
 
 ## Assets de terceiros
 

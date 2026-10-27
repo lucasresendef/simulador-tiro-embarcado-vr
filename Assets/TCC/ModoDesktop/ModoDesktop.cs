@@ -12,6 +12,7 @@ using UnityEngine.XR;
 // a câmera da cabeça passa a ser controlada pelo mouse, as mãos do AutoHand são
 // desligadas e o fuzil fica preso à câmera, apontando para a mira no centro da tela.
 // O disparo continua passando pelo AutoGun, então acertos e pontuação são os mesmos do VR.
+// Teclas evitam as do Silantro (R reinicia a cena, V liga a luz).
 // Com óculos conectado, não faz nada.
 public static class ModoDesktop
 {
@@ -111,7 +112,7 @@ public class ControleDesktop : MonoBehaviour
         foreach (var camera in FindObjectsByType<PhantomCamera>(FindObjectsSortMode.None))
         {
             if (camera.normalExterior == null) continue;
-            // Só é ativada ao apertar V; ativa desde o início, o Silantro a liga no Start
+            // Só é ativada ao apertar H; ativa desde o início, o Silantro a liga no Start
             cameraHelicoptero = camera.normalExterior;
             return;
         }
@@ -135,7 +136,7 @@ public class ControleDesktop : MonoBehaviour
         }
         fuzil.transform.SetParent(cabeca.transform, true);
 
-        // Guarda uma cópia desativada de um carregador para recarregar com a tecla R
+        // Guarda uma cópia desativada de um carregador para recarregar com a tecla T
         var carregador = FindObjectsByType<AutoAmmo>(FindObjectsSortMode.None).FirstOrDefault();
         if (carregador != null)
         {
@@ -172,7 +173,7 @@ public class ControleDesktop : MonoBehaviour
         }
 
         if (teclado.escapeKey.wasPressedThisFrame) TravarCursor(false);
-        if (teclado.vKey.wasPressedThisFrame) AlternarCameraHelicoptero();
+        if (teclado.hKey.wasPressedThisFrame) AlternarCameraHelicoptero();
 
         bool cursorTravado = Cursor.lockState == CursorLockMode.Locked;
         // Sem fuzil (ex.: menu) o cursor fica livre e a visão gira segurando o botão direito
@@ -194,7 +195,7 @@ public class ControleDesktop : MonoBehaviour
 
         if (mouse.leftButton.wasPressedThisFrame) fuzil.PressTrigger();
         if (mouse.leftButton.wasReleasedThisFrame) fuzil.ReleaseTrigger();
-        if (teclado.rKey.wasPressedThisFrame) Recarregar();
+        if (teclado.tKey.wasPressedThisFrame) Recarregar();
         cabeca.fieldOfView = mouse.rightButton.isPressed ? FovZoom : fovNormal;
     }
 
@@ -288,7 +289,7 @@ public class ControleDesktop : MonoBehaviour
 
         string ajuda = modoTiro
             ? $"MODO DESKTOP (sem óculos)   Munição: {fuzil.GetAmmo()}\n" +
-              "Mouse: mirar | Clique esq.: atirar | Botão dir.: zoom | R: recarregar | V: câmera do helicóptero | Esc: liberar cursor"
+              "Mouse: mirar | Clique esq.: atirar | Botão dir.: zoom | T: recarregar | H: câmera do helicóptero | Esc: liberar cursor"
             : "MODO DESKTOP (sem óculos)\nSegure o botão direito e mova o mouse para olhar | Clique nos botões do menu";
         GUI.Label(new Rect(10, 10, Screen.width - 20, 40), ajuda);
     }
