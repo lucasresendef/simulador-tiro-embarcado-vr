@@ -1,0 +1,38 @@
+# Normaliza finais de linha em arquivos de texto
+* text=auto
+
+# Arquivos YAML do Unity (cenas, prefabs, assets) usam o UnityYAMLMerge
+*.unity    text merge=unityyamlmerge eol=lf
+*.prefab   text merge=unityyamlmerge eol=lf
+*.asset    text merge=unityyamlmerge eol=lf
+*.mat      text merge=unityyamlmerge eol=lf
+*.anim     text merge=unityyamlmerge eol=lf
+*.controller text merge=unityyamlmerge eol=lf
+*.meta     text eol=lf
+*.cs       text diff=csharp
+
+# Binários
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.tga  binary
+*.tif  binary
+*.tiff binary
+*.psd  binary
+*.exr  binary
+*.hdr  binary
+*.fbx  binary
+*.FBX  binary
+*.obj  binary
+*.blend binary
+*.wav  binary
+*.mp3  binary
+*.ogg  binary
+*.ttf  binary
+*.otf  binary
+*.dll  binary
+*.so   binary
+*.a    binary
+*.bundle binary
+*.dylib binary
+*.mp4  binary
