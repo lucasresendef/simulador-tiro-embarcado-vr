@@ -4,7 +4,9 @@
 # Arquivos YAML do Unity (cenas, prefabs, assets) usam o UnityYAMLMerge
 *.unity    text merge=unityyamlmerge eol=lf
 *.prefab   text merge=unityyamlmerge eol=lf
-*.asset    text merge=unityyamlmerge eol=lf
+# .asset pode ser YAML ou binário (TerrainData, NavMesh, LightingData): sem forçar texto,
+# o Git detecta os binários e não altera os bytes deles
+*.asset    merge=unityyamlmerge
 *.mat      text merge=unityyamlmerge eol=lf
 *.anim     text merge=unityyamlmerge eol=lf
 *.controller text merge=unityyamlmerge eol=lf
