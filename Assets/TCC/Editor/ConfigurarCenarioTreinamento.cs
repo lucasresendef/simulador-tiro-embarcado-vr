@@ -58,6 +58,7 @@ public static class ConfigurarCenarioTreinamento
         var gerenciador = raiz.AddComponent<GerenciadorTreinamento>();
         gerenciador.efeitoAcerto = RecursosTreinamento.EfeitoAcerto;
         gerenciador.efeitoErro = RecursosTreinamento.EfeitoErro;
+        AdicionarEfeitos(raiz);
         var area = new GameObject("Area de Treinamento");
         area.transform.SetParent(raiz.transform);
         area.transform.position = centro;
@@ -83,6 +84,7 @@ public static class ConfigurarCenarioTreinamento
         CriarPessoas(8, centroAlvo, pessoas.transform);
 
         ConfigurarPilotoAutomatico(helicoptero, area.transform);
+        AmbientacaoRealista.Aplicar(cena, 350f, 2200f);
 
         EditorSceneManager.MarkSceneDirty(cena);
         EditorSceneManager.SaveScene(cena);
@@ -209,6 +211,14 @@ public static class ConfigurarCenarioTreinamento
             RecursosTreinamento.CriarPessoa(pai, hit.position, aleatorio, controlador).name = $"Pessoa {posicoes.Count}";
         }
         if (posicoes.Count < quantidade) Debug.LogWarning($"[TCC] Só foi possível posicionar {posicoes.Count} de {quantidade} pessoas na NavMesh.");
+    }
+
+    public static void AdicionarEfeitos(GameObject raiz)
+    {
+        var efeitos = raiz.AddComponent<EfeitosDisparo>();
+        efeitos.materialAditivo = RecursosTreinamento.MaterialParticula("Efeito Clarão", new Color(1f, 0.75f, 0.4f), true);
+        efeitos.materialTracante = RecursosTreinamento.MaterialParticula("Efeito Traçante", new Color(6f, 3.2f, 1f), true);
+        efeitos.materialPoeira = RecursosTreinamento.MaterialParticula("Efeito Poeira", Color.white, false);
     }
 
     static void ConfigurarPilotoAutomatico(Controller helicoptero, Transform centro)

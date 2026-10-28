@@ -76,6 +76,20 @@ Para recriar os cenários depois de mudanças: menu **TCC → Configurar cenári
 
 F1/F2 liga/desliga o motor, 1/2 coletivo, W/S/A/D cíclico, Q/E pedais, C troca a câmera do helicóptero, V liga a luz e **R reinicia a cena**.
 
+## Visual
+
+- **Ambientação** (`AmbientacaoRealista`, aplicada pelos configuradores): céu HDRI do Poly Haven iluminando a cena, sol alinhado com o do céu, bruma no horizonte e pós-processamento (ACES, cor, bloom, vinheta); SSAO e sombras suaves do URP High Fidelity.
+- **Pessoas**: personagens realistas da Microsoft Rocketbox Avatar Library, com o Animator do projeto (parado/andando/correndo/queda).
+- **Perseguição**: Terrain com relevo e serra no horizonte, texturas PBR do Poly Haven, bosques (árvores do FCG), rodovia com asfalto, acostamento, faixas e defensas metálicas, heliponto sinalizado.
+- **Efeitos de tiro** (`EfeitosDisparo`): clarão no cano, traçante, poeira no solo e faíscas no alvo; fumaça no veículo neutralizado.
+
+## Recursos gratuitos (Assets/TCC/Externos)
+
+| Recurso | Origem | Licença |
+|---|---|---|
+| Céu `kloofendal_48d_partly_cloudy_puresky` e texturas `grass_ground`, `aerial_grass_rock`, `park_dirt`, `gravel_road`, `asphalt_track` | [Poly Haven](https://polyhaven.com) | CC0 |
+| 10 personagens adultos (texturas reduzidas para 1024 px) | [Microsoft Rocketbox Avatar Library](https://github.com/microsoft/Microsoft-Rocketbox) | MIT |
+
 ## Assets de terceiros
 
 O projeto inclui assets da Unity Asset Store (Silantro Helicopter Simulator Toolkit, Auto Hand, Fantastic City Generator, entre outros), sujeitos às licenças de seus autores. Por isso o repositório deve permanecer **privado**.

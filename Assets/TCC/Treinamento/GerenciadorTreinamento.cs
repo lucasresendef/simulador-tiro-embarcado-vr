@@ -19,7 +19,13 @@ public class GerenciadorTreinamento : MonoBehaviour
     public int AcertosPessoas { get; private set; }
     public int AcertosProibidos { get; private set; }
 
-    void Awake() => Instancia = this;
+    EfeitosDisparo efeitos;
+
+    void Awake()
+    {
+        Instancia = this;
+        efeitos = GetComponent<EfeitosDisparo>();
+    }
 
     void Start()
     {
@@ -35,9 +41,10 @@ public class GerenciadorTreinamento : MonoBehaviour
     {
         Disparos++;
         var cano = arma.shootForward;
-        if (!Physics.Raycast(cano.position, cano.forward, out var hit, arma.maxHitDistance, ~0, QueryTriggerInteraction.Ignore)) return;
-        bool emAlvo = hit.collider.GetComponentInParent<AlvoTreinamento>() != null;
-        Marcar(emAlvo ? efeitoAcerto : efeitoErro, hit);
+        bool acertou = Physics.Raycast(cano.position, cano.forward, out var hit, arma.maxHitDistance, ~0, QueryTriggerInteraction.Ignore);
+        bool emAlvo = acertou && hit.collider.GetComponentInParent<AlvoTreinamento>() != null;
+        if (efeitos != null) efeitos.Disparo(arma, acertou, hit, emAlvo);
+        if (acertou) Marcar(emAlvo ? efeitoAcerto : efeitoErro, hit);
     }
 
     void AoAcertar(AutoGun arma, RaycastHit hit)

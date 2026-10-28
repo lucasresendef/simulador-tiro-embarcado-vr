@@ -149,27 +149,43 @@ public class VeiculoAlvo : MonoBehaviour
         var sistema = objeto.AddComponent<ParticleSystem>();
         sistema.Stop();
         var principal = sistema.main;
-        principal.startLifetime = 3f;
-        principal.startSpeed = 1.5f;
-        principal.startSize = new ParticleSystem.MinMaxCurve(1.5f, 3f);
-        principal.startColor = new Color(0.25f, 0.25f, 0.25f, 0.6f);
+        principal.startLifetime = new ParticleSystem.MinMaxCurve(4f, 7f);
+        principal.startSpeed = new ParticleSystem.MinMaxCurve(1f, 2.5f);
+        principal.startSize = new ParticleSystem.MinMaxCurve(1.2f, 2.5f);
+        principal.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+        principal.startColor = new ParticleSystem.MinMaxGradient(new Color(0.12f, 0.12f, 0.12f, 0.85f), new Color(0.3f, 0.3f, 0.3f, 0.7f));
         principal.simulationSpace = ParticleSystemSimulationSpace.World;
+        principal.maxParticles = 300;
         var emissao = sistema.emission;
-        emissao.rateOverTime = 12f;
+        emissao.rateOverTime = 20f;
         var forma = sistema.shape;
         forma.shapeType = ParticleSystemShapeType.Cone;
-        forma.angle = 15f;
-        forma.radius = 0.3f;
+        forma.angle = 12f;
+        forma.radius = 0.4f;
         forma.rotation = new Vector3(-90f, 0f, 0f);
+        // Sobe e se espalha com o vento, clareando até sumir
+        var velocidadeVida = sistema.velocityOverLifetime;
+        velocidadeVida.enabled = true;
+        velocidadeVida.space = ParticleSystemSimulationSpace.World;
+        velocidadeVida.x = new ParticleSystem.MinMaxCurve(0.4f, 1.2f);
+        velocidadeVida.y = new ParticleSystem.MinMaxCurve(1.5f, 3f);
+        velocidadeVida.z = new ParticleSystem.MinMaxCurve(0.2f, 0.8f);
+        var ruido = sistema.noise;
+        ruido.enabled = true;
+        ruido.strength = 0.6f;
+        ruido.frequency = 0.4f;
         var cor = sistema.colorOverLifetime;
         cor.enabled = true;
         var gradiente = new Gradient();
-        gradiente.SetKeys(new[] { new GradientColorKey(Color.gray, 0f), new GradientColorKey(Color.gray, 1f) },
-            new[] { new GradientAlphaKey(0.7f, 0f), new GradientAlphaKey(0f, 1f) });
+        gradiente.SetKeys(new[] { new GradientColorKey(new Color(0.35f, 0.35f, 0.35f), 0f), new GradientColorKey(new Color(0.7f, 0.7f, 0.72f), 1f) },
+            new[] { new GradientAlphaKey(0.9f, 0f), new GradientAlphaKey(0.5f, 0.5f), new GradientAlphaKey(0f, 1f) });
         cor.color = gradiente;
         var tamanho = sistema.sizeOverLifetime;
         tamanho.enabled = true;
-        tamanho.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0f, 0.5f, 1f, 1.5f));
+        tamanho.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0f, 0.6f, 1f, 3.5f));
+        var rotacao = sistema.rotationOverLifetime;
+        rotacao.enabled = true;
+        rotacao.z = new ParticleSystem.MinMaxCurve(-0.5f, 0.5f);
         objeto.GetComponent<ParticleSystemRenderer>().material = materialFumaca;
         return sistema;
     }

@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Animations;
@@ -14,16 +15,7 @@ public static class RecursosTreinamento
     public static GameObject EfeitoAcerto => AssetDatabase.LoadAssetAtPath<GameObject>("Assets/3rd Party Plugins/HitFolder/Prefabs/vfx_BasicHit.prefab");
     public static GameObject EfeitoErro => AssetDatabase.LoadAssetAtPath<GameObject>("Assets/3rd Party Plugins/HitFolder/Prefabs/vfx_Spark1.prefab");
 
-    const string PrefabPessoa = "Assets/3rd Party Plugins/Blink/Art/Characters/LowPoly/FREE_HumanLowPoly/Prefabs_Humans/HumanMale_Character_FREE.prefab";
-
-    static readonly Color[] Camisas =
-    {
-        new(0.92f, 0.92f, 0.9f), new(0.12f, 0.12f, 0.14f), new(0.7f, 0.12f, 0.12f), new(0.15f, 0.25f, 0.55f),
-        new(0.25f, 0.45f, 0.25f), new(0.85f, 0.7f, 0.2f), new(0.45f, 0.45f, 0.48f), new(0.55f, 0.3f, 0.6f)
-    };
-    static readonly Color[] Calcas = { new(0.2f, 0.3f, 0.5f), new(0.12f, 0.12f, 0.14f), new(0.6f, 0.55f, 0.42f), new(0.35f, 0.35f, 0.38f) };
-    static readonly Color[] Peles = { new(0.87f, 0.69f, 0.55f), new(0.68f, 0.48f, 0.34f), new(0.45f, 0.3f, 0.2f), new(0.3f, 0.2f, 0.14f) };
-    static readonly Color[] Cabelos = { new(0.08f, 0.07f, 0.06f), new(0.3f, 0.18f, 0.1f), new(0.75f, 0.6f, 0.35f), new(0.5f, 0.5f, 0.5f) };
+    const string PastaRocketbox = "Assets/TCC/Externos/Rocketbox";
 
     static AnimationClip Clipe(string caminho) =>
         AssetDatabase.LoadAllAssetsAtPath(caminho).OfType<AnimationClip>().First(c => !c.name.StartsWith("__preview"));
@@ -81,6 +73,33 @@ public static class RecursosTreinamento
         return material;
     }
 
+    // Material de partícula (Default-Particle redonda): aditivo para clarão e traçante, alfa para poeira
+    public static Material MaterialParticula(string nome, Color cor, bool aditivo)
+    {
+        var caminho = $"{Pasta}/{nome}.mat";
+        var material = AssetDatabase.LoadAssetAtPath<Material>(caminho);
+        if (material != null)
+        {
+            material.SetColor("_BaseColor", cor);
+            EditorUtility.SetDirty(material);
+            return material;
+        }
+        material = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
+        material.SetTexture("_BaseMap", AssetDatabase.GetBuiltinExtraResource<Texture2D>("Default-Particle.psd"));
+        material.SetColor("_BaseColor", cor);
+        material.SetFloat("_Surface", 1f);
+        material.SetFloat("_Blend", aditivo ? 2f : 0f);
+        material.SetOverrideTag("RenderType", "Transparent");
+        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        material.SetInt("_DstBlend", (int)(aditivo ? UnityEngine.Rendering.BlendMode.One : UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha));
+        material.SetInt("_ZWrite", 0);
+        material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        if (aditivo) material.EnableKeyword("_BLENDMODE_ADD");
+        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+        AssetDatabase.CreateAsset(material, caminho);
+        return material;
+    }
+
     public static Material MaterialEstrada()
     {
         var caminho = Pasta + "/Estrada.mat";
@@ -110,36 +129,72 @@ public static class RecursosTreinamento
     }
 
     // Pessoa: modelo Synty (homem ou mulher) com roupa sorteada, NavMeshAgent e máquina de estados de fuga
-    // Pessoa: personagem low poly do Blink com roupa, pele e cabelo sorteados,
-    // NavMeshAgent e máquina de estados de fuga
+    // Personagens realistas da Microsoft Rocketbox Avatar Library (MIT), feitos para pesquisa em RV
+    public static GameObject[] ModelosPessoa()
+    {
+        var modelos = AssetDatabase.FindAssets("t:Model", new[] { PastaRocketbox })
+            .Select(AssetDatabase.GUIDToAssetPath).Where(c => c.EndsWith(".fbx")).OrderBy(c => c).ToArray();
+        foreach (var modelo in modelos) PrepararMateriais(modelo);
+        return modelos.Select(AssetDatabase.LoadAssetAtPath<GameObject>).ToArray();
+    }
+
+    // Troca os materiais importados do FBX (que apontam para TGAs que não existem) por materiais
+    // URP com as texturas convertidas: corpo, cabeça e cabelo/cílios com transparência recortada
+    static void PrepararMateriais(string caminhoModelo)
+    {
+        var importador = (ModelImporter)AssetImporter.GetAtPath(caminhoModelo);
+        if (importador.GetExternalObjectMap().Count > 0) return;
+        var pasta = Path.GetDirectoryName(caminhoModelo).Replace('\\', '/');
+        var nomeModelo = Path.GetFileNameWithoutExtension(caminhoModelo);
+        Texture2D Textura(string parte, string mapa) => Directory.GetFiles(pasta, $"*_{parte}_{mapa}.png")
+            .Select(c => AssetDatabase.LoadAssetAtPath<Texture2D>(c.Replace('\\', '/'))).FirstOrDefault();
+
+        foreach (var original in AssetDatabase.LoadAllAssetsAtPath(caminhoModelo).OfType<Material>())
+        {
+            string parte = original.name.Contains("opacity") ? "opacity" : original.name.Contains("head") ? "head" : original.name.Contains("body") ? "body" : null;
+            if (parte == null)
+            {
+                Debug.LogWarning($"[TCC] Material sem correspondência em {nomeModelo}: {original.name}");
+                continue;
+            }
+            var material = new Material(Shader.Find("Universal Render Pipeline/Lit")) { name = $"{nomeModelo} {parte}" };
+            material.SetTexture("_BaseMap", Textura(parte, "color"));
+            material.SetFloat("_Smoothness", 0.25f);
+            var normal = Textura(parte, "normal");
+            if (normal != null)
+            {
+                material.SetTexture("_BumpMap", normal);
+                material.EnableKeyword("_NORMALMAP");
+            }
+            if (parte == "opacity")
+            {
+                material.SetFloat("_AlphaClip", 1f);
+                material.SetFloat("_Cutoff", 0.5f);
+                material.EnableKeyword("_ALPHATEST_ON");
+                material.SetFloat("_Cull", 0f);
+                material.doubleSidedGI = true;
+            }
+            var caminhoMaterial = $"{pasta}/{material.name}.mat";
+            AssetDatabase.DeleteAsset(caminhoMaterial);
+            AssetDatabase.CreateAsset(material, caminhoMaterial);
+            importador.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), original.name), material);
+        }
+        importador.SaveAndReimport();
+    }
+
+    static GameObject[] modelosPessoa;
+
     public static GameObject CriarPessoa(Transform pai, Vector3 posicao, System.Random aleatorio, RuntimeAnimatorController controlador)
     {
-        var pessoa = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPessoa), pai);
+        modelosPessoa ??= ModelosPessoa();
+        var pessoa = (GameObject)PrefabUtility.InstantiatePrefab(modelosPessoa[aleatorio.Next(modelosPessoa.Length)], pai);
         pessoa.transform.SetPositionAndRotation(posicao, Quaternion.Euler(0f, (float)aleatorio.NextDouble() * 360f, 0f));
-        pessoa.transform.localScale = Vector3.one * (0.95f + (float)aleatorio.NextDouble() * 0.1f);
-
-        int camisa = aleatorio.Next(Camisas.Length), calca = aleatorio.Next(Calcas.Length);
-        int pele = aleatorio.Next(Peles.Length), cabelo = aleatorio.Next(Cabelos.Length);
-        bool barba = aleatorio.NextDouble() < 0.4, bigode = aleatorio.NextDouble() < 0.3;
-        var materialCamisa = MaterialCor($"Pessoa Camisa {camisa + 1}", Camisas[camisa]);
-        var materialCalca = MaterialCor($"Pessoa Calça {calca + 1}", Calcas[calca]);
-        var materialPele = MaterialCor($"Pessoa Pele {pele + 1}", Peles[pele]);
-        var materialCabelo = MaterialCor($"Pessoa Cabelo {cabelo + 1}", Cabelos[cabelo]);
-        var materialBotas = MaterialCor("Pessoa Calçado", new Color(0.1f, 0.08f, 0.07f));
-
-        foreach (var parte in pessoa.GetComponentsInChildren<Renderer>(true))
+        // Garante a escala humana (o FBX pode vir em outra unidade)
+        var limites = pessoa.GetComponentsInChildren<Renderer>().Select(r => r.bounds).Aggregate((a, b) => { a.Encapsulate(b); return a; });
+        if (limites.size.y < 1.4f || limites.size.y > 2.1f)
         {
-            switch (parte.name)
-            {
-                case "Starter_Chest": parte.gameObject.SetActive(true); parte.sharedMaterial = materialCamisa; break;
-                case "Starter_Pants": parte.gameObject.SetActive(true); parte.sharedMaterial = materialCalca; break;
-                case "Starter_Boots": parte.gameObject.SetActive(true); parte.sharedMaterial = materialBotas; break;
-                case "Chest": case "Legs": case "Feet": case "Underwear": parte.gameObject.SetActive(false); break;
-                case "Arms": case "Hands": case "Neck": case "Head": parte.sharedMaterial = materialPele; break;
-                case "Hair7": case "Eyebrows": case "Eyelashes": parte.sharedMaterial = materialCabelo; break;
-                case "Beard6": parte.gameObject.SetActive(barba); parte.sharedMaterial = materialCabelo; break;
-                case "Moustache4": parte.gameObject.SetActive(bigode); parte.sharedMaterial = materialCabelo; break;
-            }
+            Debug.Log($"[TCC] {pessoa.name}: altura {limites.size.y:F2} m, ajustada para 1,75 m.");
+            pessoa.transform.localScale *= 1.75f / limites.size.y;
         }
 
         var animator = pessoa.GetComponentInChildren<Animator>();
