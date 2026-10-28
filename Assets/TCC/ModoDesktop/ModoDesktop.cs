@@ -56,6 +56,7 @@ public class ControleDesktop : MonoBehaviour
     float yaw, pitch, fovNormal;
     bool modoTiro;
     bool ouvinteAjustado;
+    Vector3 pontoMirado;
 
     void Awake()
     {
@@ -218,32 +219,38 @@ public class ControleDesktop : MonoBehaviour
     }
 
     // Posiciona o fuzil depois da câmera se mover, com o cano apontando para o ponto sob a mira
-    void LateUpdate() => AlinharFuzil();
-
-    // O AutoGun dispara no passo de física: realinha com a câmera e os alvos atuais,
-    // senão o tiro sai com a pose do quadro anterior e erra alvos em movimento
-    void FixedUpdate()
-    {
-        if (!modoTiro) return;
-        Physics.SyncTransforms();
-        AlinharFuzil();
-    }
-
-    void AlinharFuzil()
+    void LateUpdate()
     {
         if (!modoTiro || fuzil.shootForward == null) return;
+        pontoMirado = PontoSobAMira();
+        ApontarPara(pontoMirado);
+    }
 
-        var cano = fuzil.shootForward;
+    // O AutoGun dispara no passo de física. Com mais de um passo por quadro, a aeronave já se
+    // moveu e girou em relação ao que o operador viu; por isso o cano aponta para o ponto do
+    // mundo que estava sob a mira no último quadro (os alvos só se movem no Update)
+    void FixedUpdate()
+    {
+        if (!modoTiro || fuzil.shootForward == null) return;
+        Physics.SyncTransforms();
+        ApontarPara(pontoMirado);
+    }
+
+    Vector3 PontoSobAMira()
+    {
         var raio = new Ray(cabeca.transform.position, cabeca.transform.forward);
-        var alvo = raio.GetPoint(fuzil.maxHitDistance);
         foreach (var hit in Physics.RaycastAll(raio, fuzil.maxHitDistance, ~0, QueryTriggerInteraction.Ignore).OrderBy(h => h.distance))
         {
             // Ignora o próprio fuzil e a estrutura do helicóptero logo à frente da câmera
             if (hit.distance < 2f || hit.transform.IsChildOf(fuzil.transform)) continue;
-            alvo = hit.point;
-            break;
+            return hit.point;
         }
+        return raio.GetPoint(fuzil.maxHitDistance);
+    }
 
+    void ApontarPara(Vector3 alvo)
+    {
+        var cano = fuzil.shootForward;
         var canoLocalPos = fuzil.transform.InverseTransformPoint(cano.position);
         var canoLocalRot = Quaternion.Inverse(fuzil.transform.rotation) * cano.rotation;
         var posicaoCano = cabeca.transform.TransformPoint(OffsetCano);
