@@ -16,8 +16,12 @@ O projeto original estava no Unity 2021.3.45f2; o primeiro commit deste reposit�
 
 ## Cenas
 
-1. `Assets/Scenes/1 Start Scene.unity` — menu inicial.
-2. `Assets/Scenes/cena principal.unity` — cidade, helicóptero e alvo (carregada pelo menu).
+1. `Assets/Scenes/1 Start Scene.unity` — menu inicial. Em **Iniciar**, escolhe-se o cenário:
+   - **Cidade**: tambor fixo, veículos e pessoas em fuga; piloto manual.
+   - **Perseguição**: rodovia com um suspeito em fuga, viaturas e trânsito civil; piloto automático em acompanhamento.
+   - **Cidade + piloto**: a cidade com o piloto automático já ligado (órbita).
+2. `Assets/Scenes/cena principal.unity` — cidade.
+3. `Assets/Scenes/cena perseguicao.unity` — perseguição na rodovia.
 
 ## Como executar
 
@@ -50,6 +54,7 @@ Opcional, para o instrutor se concentrar no treinamento. Com **P** liga/desliga 
 | Órbita | Círculo em torno da área (padrão: 300 ft, raio de 60 m, 20 kt) |
 | Deslocamento linear | Circuito oval com passagens retas pela área (40 kt nas retas) |
 | Pairado | Para onde a frenagem terminar e paira |
+| Acompanhamento | Lado a lado com o suspeito na perseguição (200 ft, 50 m), na mesma velocidade |
 
 Se o motor estiver desligado, ele dá a partida e decola na vertical. A altura sobe sozinha se algum prédio ficar a menos de 20 m da trajetória. Ao desligar, a aeronave volta para a física do Silantro mantendo a velocidade. Os parâmetros ficam no componente `PilotoAutomatico` do helicóptero.
 
@@ -57,11 +62,15 @@ Se o motor estiver desligado, ele dá a partida e decola na vertical. A altura s
 
 Além do tambor fixo, a cena principal tem (objeto `[TCC] Treinamento`):
 
-- **Veículos** (`VeiculoAlvo`): 4 carros em dois circuitos sobre as ruas ao sul do alvo (rotas em Splines, mão direita), de 30 a 55 km/h. Atingido, o carro para por alguns segundos e retoma o percurso.
-- **Pessoas em fuga** (`PessoaEmFuga`): 6 pessoas na praça do alvo. Máquina de estados Parada → Alerta → Fugindo → Escondida → Retornando; ao perceber o helicóptero, fogem da posição prevista da aeronave pela NavMesh da área. Atingida, a pessoa cai e reaparece depois de alguns segundos.
-- **Placar** (`GerenciadorTreinamento`): disparos e acertos por tipo de alvo, no canto da tela.
+- **Veículos** (`VeiculoAlvo`): 4 carros em dois circuitos sobre as ruas ao sul do alvo (rotas em Splines, mão direita), de 30 a 55 km/h. Mantêm distância do carro da frente e cedem a vez nos cruzamentos. Atingido, o carro para soltando fumaça e depois retoma o percurso. O trânsito aleatório do Fantastic City Generator fica desligado nesta cena, pois atravessava os carros das rotas.
+- **Pessoas em fuga** (`PessoaEmFuga`): 8 pessoas na praça do alvo, com roupas, pele e cabelo variados. Máquina de estados Parada → Alerta → Fugindo → Escondida → Retornando; ao perceber o helicóptero, fogem da posição prevista da aeronave pela NavMesh da área, andando ou correndo conforme a velocidade. Atingida, a pessoa cai e reaparece depois de alguns segundos.
+- **Placar e impactos** (`GerenciadorTreinamento`): disparos e acertos por tipo de alvo no canto da tela; todo disparo deixa uma marca no ponto de impacto, também quando erra.
 
-Para recriar o cenário (rotas, NavMesh, veículos, pessoas e piloto automático): menu **TCC → Configurar cenário de treinamento**.
+### Perseguição
+
+O suspeito (carro vermelho) foge a 95 km/h pela rodovia, em zigue-zague, seguido por duas viaturas com giroflex; na contramão passa o trânsito civil. A fuga começa quando o helicóptero passa de 150 ft. São necessários 6 acertos para neutralizar o suspeito; **acertar viaturas ou civis conta como erro de identificação** (placar "NÃO AUTORIZADOS"). R reinicia o cenário.
+
+Para recriar os cenários depois de mudanças: menu **TCC → Configurar cenário de treinamento** (cidade), **TCC → Criar cena de perseguição** e **TCC → Configurar menu inicial**.
 
 ### Pilotagem (Silantro)
 

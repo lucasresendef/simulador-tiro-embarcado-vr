@@ -3,14 +3,15 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // Piloto automático para o treinamento: voa os padrões do protocolo do COMAVE
-// (órbita, deslocamento linear e pairado) em torno da área de treinamento, sempre com a
+// (órbita, deslocamento linear e pairado) em torno da área de treinamento, ou acompanha
+// um veículo em fuga lado a lado (perseguição), sempre com a
 // porta do operador voltada para o alvo. É opcional: P liga/desliga e O troca o padrão;
 // desligado, o helicóptero volta para a física do Silantro mantendo a velocidade atual.
 // Enquanto ligado, o voo é cinemático, o que torna as passagens repetíveis entre sessões.
 [RequireComponent(typeof(Controller))]
 public class PilotoAutomatico : MonoBehaviour
 {
-    public enum Padrao { Orbita, Linear, Pairado }
+    public enum Padrao { Orbita, Linear, Pairado, Acompanhamento }
     public enum LadoPorta { Esquerda, Direita }
 
     [Tooltip("Centro da área de treinamento (nível do solo)")]
@@ -28,11 +29,15 @@ public class PilotoAutomatico : MonoBehaviour
     public float comprimentoReta = 160f;
     [Tooltip("Direção das retas do padrão linear (graus a partir do norte)")]
     public float rumoReta = 90f;
+    [Tooltip("Veículo acompanhado no padrão de acompanhamento (perseguição)")]
+    public Transform alvoAcompanhado;
     [Range(0f, 2f)] public float vibracao = 1f;
     public bool ligarAoIniciar;
 
     const float Nos = 0.5144f;
     const float AceleracaoMaxima = 3f, VelocidadeMaxima = 30f, SubidaMaxima = 5f, GiroMaximo = 25f;
+    // No acompanhamento a aeronave precisa alcançar e seguir um carro em alta velocidade
+    const float AceleracaoAcompanhamento = 6f, VelocidadeMaximaAcompanhamento = 50f;
     const float FolgaTelhados = 20f;
 
     public bool Ligado { get; private set; }
@@ -40,7 +45,7 @@ public class PilotoAutomatico : MonoBehaviour
 
     Controller controle;
     Rigidbody corpo;
-    Vector3 portaLocal, velocidade, aceleracaoSuave, posicaoNominal;
+    Vector3 portaLocal, velocidade, aceleracaoSuave, posicaoNominal, velocidadeAlvo, ultimaPosicaoAlvo;
     float fase, sentido, alturaEfetiva, ultimoYaw;
     RigidbodyInterpolation interpolacaoOriginal;
     string aviso;
@@ -57,7 +62,7 @@ public class PilotoAutomatico : MonoBehaviour
         // Porta à esquerda: a aeronave circula com o alvo à esquerda (sentido anti-horário)
         sentido = porta == LadoPorta.Esquerda ? 1f : -1f;
 
-        if (ligarAoIniciar) Ligar();
+        if (ligarAoIniciar || ConfiguracaoSessao.PilotoAutomaticoAoIniciar) Ligar();
     }
 
     void Update()
@@ -71,14 +76,16 @@ public class PilotoAutomatico : MonoBehaviour
         }
         if (teclado.oKey.wasPressedThisFrame)
         {
-            padrao = (Padrao)(((int)padrao + 1) % 3);
+            int total = alvoAcompanhado != null ? 4 : 3;
+            padrao = (Padrao)(((int)padrao + 1) % total);
             if (Ligado) IniciarPadrao();
         }
     }
 
     public void Ligar()
     {
-        if (centro == null)
+        if (padrao == Padrao.Acompanhamento && alvoAcompanhado == null) padrao = Padrao.Orbita;
+        if (centro == null && padrao != Padrao.Acompanhamento)
         {
             aviso = "sem centro da área de treinamento definido";
             return;
@@ -114,6 +121,13 @@ public class PilotoAutomatico : MonoBehaviour
 
     void IniciarPadrao()
     {
+        if (padrao == Padrao.Acompanhamento)
+        {
+            alturaEfetiva = Altura;
+            aviso = null;
+            if (alvoAcompanhado != null) ultimaPosicaoAlvo = alvoAcompanhado.position;
+            return;
+        }
         fase = FaseMaisProxima(transform.position);
         alturaEfetiva = AlturaSegura();
         aviso = alturaEfetiva > Altura + 0.5f ? $"altura elevada para {alturaEfetiva / 0.3048f:F0} ft por causa dos prédios" : null;
@@ -133,10 +147,12 @@ public class PilotoAutomatico : MonoBehaviour
 
         var velocidadeDesejada = VelocidadeDesejada(posicao);
         // Decola na vertical: só se desloca na horizontal depois de ganhar altura
-        if (AlturaSobreSolo(posicao) < 30f && PontoDoPadrao(fase).y - posicao.y > 10f)
+        float alturaDesejada = padrao == Padrao.Acompanhamento ? PontoAcompanhamento().y : PontoDoPadrao(fase).y;
+        if (AlturaSobreSolo(posicao) < 30f && alturaDesejada - posicao.y > 10f)
             velocidadeDesejada = new Vector3(0f, velocidadeDesejada.y, 0f);
 
-        var novaVelocidade = Vector3.MoveTowards(velocidade, velocidadeDesejada, AceleracaoMaxima * dt);
+        float aceleracaoMaxima = padrao == Padrao.Acompanhamento ? AceleracaoAcompanhamento : AceleracaoMaxima;
+        var novaVelocidade = Vector3.MoveTowards(velocidade, velocidadeDesejada, aceleracaoMaxima * dt);
         aceleracaoSuave = Vector3.Lerp(aceleracaoSuave, (novaVelocidade - velocidade) / dt, 0.05f);
         velocidade = novaVelocidade;
         posicao += velocidade * dt;
@@ -156,6 +172,8 @@ public class PilotoAutomatico : MonoBehaviour
     // da trajetória mais próximo da aeronave e o rumo aponta para um ponto adiante dele.
     Vector3 VelocidadeDesejada(Vector3 posicao)
     {
+        if (padrao == Padrao.Acompanhamento) return VelocidadeAcompanhamento(posicao);
+
         if (padrao == Padrao.Pairado)
         {
             // Perfil de frenagem: chega ao ponto sem ultrapassá-lo
@@ -179,6 +197,26 @@ public class PilotoAutomatico : MonoBehaviour
     }
 
     const float Antecipacao = 15f;
+
+    // Lado a lado com o veículo, a um raio de distância, com a porta voltada para ele
+    Vector3 PontoAcompanhamento()
+    {
+        var frente = Horizontal(velocidadeAlvo).sqrMagnitude > 1f ? Horizontal(velocidadeAlvo).normalized : Horizontal(alvoAcompanhado.forward).normalized;
+        var lado = Vector3.Cross(Vector3.up, frente) * (porta == LadoPorta.Esquerda ? 1f : -1f);
+        return alvoAcompanhado.position + lado * raio + Vector3.up * Altura;
+    }
+
+    Vector3 VelocidadeAcompanhamento(Vector3 posicao)
+    {
+        if (alvoAcompanhado == null) return Vector3.zero;
+        float dt = Time.fixedDeltaTime;
+        velocidadeAlvo = Vector3.Lerp(velocidadeAlvo, (alvoAcompanhado.position - ultimaPosicaoAlvo) / dt, 0.1f);
+        ultimaPosicaoAlvo = alvoAcompanhado.position;
+
+        var erro = PontoAcompanhamento() - posicao;
+        var horizontal = Vector3.ClampMagnitude(Horizontal(velocidadeAlvo) + Horizontal(erro) * 0.5f, VelocidadeMaximaAcompanhamento);
+        return horizontal + Vector3.up * Mathf.Clamp(erro.y * 0.4f, -SubidaMaxima, SubidaMaxima);
+    }
 
     // Busca local, em torno da fase atual, do ponto da trajetória mais próximo
     float FaseProxima(Vector3 posicao, float faseAtual)
@@ -252,6 +290,7 @@ public class PilotoAutomatico : MonoBehaviour
 
     Vector3 PontoDeReferencia(Vector3 posicao)
     {
+        if (padrao == Padrao.Acompanhamento) return alvoAcompanhado != null ? alvoAcompanhado.position : posicao;
         if (padrao != Padrao.Linear) return centro.position;
         // No linear, a porta aponta para o eixo do circuito (perpendicular às retas)
         var local = Vector3.Dot(posicao - centro.position, EixoReta());
@@ -342,9 +381,9 @@ public class PilotoAutomatico : MonoBehaviour
 
     void OnGUI()
     {
-        string nomePadrao = padrao switch { Padrao.Orbita => "órbita", Padrao.Linear => "deslocamento linear", _ => "pairado" };
+        string nomePadrao = padrao switch { Padrao.Orbita => "órbita", Padrao.Linear => "deslocamento linear", Padrao.Acompanhamento => "acompanhamento", _ => "pairado" };
         string texto = Ligado
-            ? $"PILOTO AUTOMÁTICO: {nomePadrao.ToUpper()} ({alturaEfetiva / 0.3048f:F0} ft, raio {raio:F0} m, {velocidade.magnitude / Nos:F0} kt) | P: desligar | O: trocar padrão"
+            ? $"PILOTO AUTOMÁTICO: {nomePadrao.ToUpper()} ({alturaEfetiva / 0.3048f:F0} ft, {(padrao == Padrao.Acompanhamento ? "afastamento" : "raio")} {raio:F0} m, {velocidade.magnitude / Nos:F0} kt) | P: desligar | O: trocar padrão"
             : $"Piloto automático desligado ({nomePadrao}) | P: ligar | O: trocar padrão";
         if (Ligado && controle.CurrentEngineState != Controller.EngineState.Active) texto += " | aguardando o motor";
         if (!string.IsNullOrEmpty(aviso)) texto += " | " + aviso;

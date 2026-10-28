@@ -37,6 +37,8 @@ public static class ModoDesktop
     }
 }
 
+// Executa antes do AutoGun, para que o FixedUpdate realinhe o fuzil antes do disparo
+[DefaultExecutionOrder(-100)]
 public class ControleDesktop : MonoBehaviour
 {
     // Altura dos olhos do operador sentado, usada quando o rig não tem rastreamento
@@ -76,6 +78,7 @@ public class ControleDesktop : MonoBehaviour
             inventario.enabled = false;
 
         modoTiro = fuzil != null;
+        if (!modoTiro) OlharParaMenu();
         Debug.Log($"[Modo desktop] Ativo na cena '{SceneManager.GetActiveScene().name}' (câmera '{cabeca.name}', fuzil: {(modoTiro ? fuzil.name : "nenhum")}).");
     }
 
@@ -93,6 +96,21 @@ public class ControleDesktop : MonoBehaviour
         yaw = angulos.y;
         pitch = Mathf.DeltaAngle(0f, angulos.x);
         fovNormal = cabeca.fieldOfView;
+    }
+
+    // Sem fuzil (menu): começa olhando para o painel ativo, que no VR fica à altura dos olhos
+    void OlharParaMenu()
+    {
+        var painel = FindObjectsByType<Canvas>(FindObjectsSortMode.None)
+            .FirstOrDefault(c => c.renderMode == RenderMode.WorldSpace && c.isActiveAndEnabled);
+        if (painel == null) return;
+        var direcao = painel.transform.position - cabeca.transform.position;
+        if (cabeca.transform.parent != null) direcao = cabeca.transform.parent.InverseTransformDirection(direcao);
+        var angulos = Quaternion.LookRotation(direcao).eulerAngles;
+        yaw = angulos.y;
+        // Um pouco acima do centro dos botões, para o título também aparecer
+        pitch = Mathf.DeltaAngle(0f, angulos.x) - 8f;
+        cabeca.transform.localRotation = Quaternion.Euler(pitch, yaw, 0f);
     }
 
     // Os menus usam só raycasters de controle VR; adiciona o raycaster de mouse
@@ -200,7 +218,18 @@ public class ControleDesktop : MonoBehaviour
     }
 
     // Posiciona o fuzil depois da câmera se mover, com o cano apontando para o ponto sob a mira
-    void LateUpdate()
+    void LateUpdate() => AlinharFuzil();
+
+    // O AutoGun dispara no passo de física: realinha com a câmera e os alvos atuais,
+    // senão o tiro sai com a pose do quadro anterior e erra alvos em movimento
+    void FixedUpdate()
+    {
+        if (!modoTiro) return;
+        Physics.SyncTransforms();
+        AlinharFuzil();
+    }
+
+    void AlinharFuzil()
     {
         if (!modoTiro || fuzil.shootForward == null) return;
 

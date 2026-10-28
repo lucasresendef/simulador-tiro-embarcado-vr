@@ -14,11 +14,12 @@ public class PessoaEmFuga : MonoBehaviour
     [Tooltip("Raio da área, em torno do ponto inicial, em que a pessoa pode se deslocar")]
     public float raioArea = 45f;
     public float velocidadeCorrida = 5f;
-    public float velocidadeRetorno = 2f;
+    public float velocidadeRetorno = 1.5f;
     public float tempoAbatida = 8f;
 
-    // Valores do parâmetro "currentState" do LowPolyHumanAnimator
-    const int AnimParado = 1, AnimCorrendo = 2, AnimMorte = 4;
+    // Parâmetros do PessoaAnimator: a mistura parado/andando/correndo segue a velocidade real
+    static readonly int ParamVelocidade = Animator.StringToHash("Velocidade");
+    static readonly int ParamAbatida = Animator.StringToHash("Abatida");
 
     interface IEstado
     {
@@ -35,6 +36,7 @@ public class PessoaEmFuga : MonoBehaviour
     IEstado estado;
     float tempoNoEstado;
     bool atingida;
+    float desvioFuga;
 
     public string NomeEstado => estado?.GetType().Name;
 
@@ -52,6 +54,8 @@ public class PessoaEmFuga : MonoBehaviour
         }
 
         posicaoInicial = transform.position;
+        // Cada pessoa tem uma tendência própria de direção, para não fugirem todas para o mesmo lugar
+        desvioFuga = Random.Range(-40f, 40f);
         // A reação fica para o próximo quadro: o AutoGun ainda usa o colisor depois de notificar o acerto
         alvo.AoSerAtingido += (_, _) => atingida = true;
         MudarPara(new Parada());
@@ -75,10 +79,9 @@ public class PessoaEmFuga : MonoBehaviour
         tempoNoEstado += Time.deltaTime;
         estado.Atualizar(this);
 
-        if (agente.enabled && animator != null && agente.speed > 0f)
-            animator.speed = estado is Fugindo || estado is Retornando
-                ? Mathf.Clamp(agente.velocity.magnitude / velocidadeCorrida, 0.5f, 1.2f)
-                : 1f;
+        alvo.InformarVelocidade(agente.velocity);
+        if (animator != null)
+            animator.SetFloat(ParamVelocidade, agente.velocity.magnitude, 0.15f, Time.deltaTime);
     }
 
     void MudarPara(IEstado novo)
@@ -88,9 +91,9 @@ public class PessoaEmFuga : MonoBehaviour
         novo.Entrar(this);
     }
 
-    void Animar(int estadoAnimacao)
+    void Abater(bool abatida)
     {
-        if (animator != null) animator.SetInteger("currentState", estadoAnimacao);
+        if (animator != null) animator.SetBool(ParamAbatida, abatida);
     }
 
     bool HelicopteroPerto()
@@ -107,7 +110,7 @@ public class PessoaEmFuga : MonoBehaviour
         var previsto = helicoptero.position + velocidadeHelicoptero * 2f;
         var fuga = transform.position - previsto;
         fuga.y = 0f;
-        fuga = fuga.sqrMagnitude > 0.01f ? fuga.normalized : transform.forward;
+        fuga = Quaternion.Euler(0f, desvioFuga, 0f) * (fuga.sqrMagnitude > 0.01f ? fuga.normalized : transform.forward);
 
         float distancia = Random.Range(15f, 30f);
         foreach (float angulo in new[] { 0f, 30f, -30f, 60f, -60f, 90f, -90f, 135f, -135f })
@@ -135,7 +138,6 @@ public class PessoaEmFuga : MonoBehaviour
         public void Entrar(PessoaEmFuga p)
         {
             p.agente.ResetPath();
-            p.Animar(AnimParado);
         }
 
         public void Atualizar(PessoaEmFuga p)
@@ -153,7 +155,6 @@ public class PessoaEmFuga : MonoBehaviour
         {
             reacao = Random.Range(0.5f, 1.5f);
             p.agente.ResetPath();
-            p.Animar(AnimParado);
         }
 
         public void Atualizar(PessoaEmFuga p)
@@ -173,8 +174,7 @@ public class PessoaEmFuga : MonoBehaviour
         public void Entrar(PessoaEmFuga p)
         {
             duracao = Random.Range(6f, 10f);
-            p.agente.speed = p.velocidadeCorrida;
-            p.Animar(AnimCorrendo);
+            p.agente.speed = p.velocidadeCorrida * Random.Range(0.85f, 1.1f);
             Decidir(p);
         }
 
@@ -200,7 +200,6 @@ public class PessoaEmFuga : MonoBehaviour
         {
             duracao = Random.Range(5f, 12f);
             p.agente.ResetPath();
-            p.Animar(AnimParado);
         }
 
         public void Atualizar(PessoaEmFuga p)
@@ -215,7 +214,6 @@ public class PessoaEmFuga : MonoBehaviour
         {
             p.agente.speed = p.velocidadeRetorno;
             p.agente.SetDestination(p.PontoAleatorioPertoDoInicio());
-            p.Animar(AnimCorrendo);
         }
 
         public void Atualizar(PessoaEmFuga p)
@@ -234,7 +232,7 @@ public class PessoaEmFuga : MonoBehaviour
             p.agente.ResetPath();
             p.agente.isStopped = true;
             if (p.colisor != null) p.colisor.enabled = false;
-            p.Animar(AnimMorte);
+            p.Abater(true);
         }
 
         public void Atualizar(PessoaEmFuga p)
@@ -244,6 +242,7 @@ public class PessoaEmFuga : MonoBehaviour
             p.agente.isStopped = false;
             if (p.colisor != null) p.colisor.enabled = true;
             p.alvo.Neutralizado = false;
+            p.Abater(false);
             p.MudarPara(new Parada());
         }
     }

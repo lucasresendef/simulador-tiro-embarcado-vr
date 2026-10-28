@@ -10,6 +10,8 @@ public enum TipoAlvo { Veiculo, Pessoa }
 public class AlvoTreinamento : MonoBehaviour
 {
     public TipoAlvo tipo;
+    [Tooltip("Alvo que não deve ser atingido (viaturas, civis): conta como erro de identificação")]
+    public bool proibido;
 
     public int Acertos { get; private set; }
     // Enquanto neutralizado (parado ou abatido), novos acertos não contam
@@ -19,6 +21,14 @@ public class AlvoTreinamento : MonoBehaviour
     public event Action<AlvoTreinamento, RaycastHit> AoSerAtingido;
 
     Vector3 ultimaPosicao;
+    bool velocidadeInformada;
+
+    // Quem move o alvo informa a velocidade exata; sem isso, ela é estimada pelo deslocamento
+    public void InformarVelocidade(Vector3 velocidade)
+    {
+        Velocidade = velocidade;
+        velocidadeInformada = true;
+    }
 
     void Awake()
     {
@@ -28,7 +38,7 @@ public class AlvoTreinamento : MonoBehaviour
 
     void Update()
     {
-        if (Time.deltaTime > 0f)
+        if (!velocidadeInformada && Time.deltaTime > 0f)
             Velocidade = Vector3.Lerp(Velocidade, (transform.position - ultimaPosicao) / Time.deltaTime, 0.3f);
         ultimaPosicao = transform.position;
     }

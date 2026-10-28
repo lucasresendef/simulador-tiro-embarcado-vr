@@ -20,6 +20,10 @@ public class GameStartMenu : MonoBehaviour
     public Button[] dificultyButtons;
     public List<Button> returnButtons;
 
+    [Header("Cenários (um por botão da seleção)")]
+    public int[] cenaDoBotao = { 1, 2, 1 };
+    public bool[] pilotoAutomaticoDoBotao = { false, false, true };
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,7 +41,8 @@ public class GameStartMenu : MonoBehaviour
         }
         for (int i = 0; i < dificultyButtons.Length; i++)
         {
-            dificultyButtons[i].onClick.AddListener(StartGame);
+            int botao = i;
+            dificultyButtons[i].onClick.AddListener(() => StartGame(botao));
         }
     }
 
@@ -52,10 +57,13 @@ public class GameStartMenu : MonoBehaviour
         dificultySelection.SetActive(true);
     }
 
-    public void StartGame()
+    public void StartGame() => StartGame(0);
+
+    public void StartGame(int botao)
     {
         HideAll();
-        SceneTransitionManager.singleton.GoToSceneAsync(1);
+        ConfiguracaoSessao.PilotoAutomaticoAoIniciar = botao < pilotoAutomaticoDoBotao.Length && pilotoAutomaticoDoBotao[botao];
+        SceneTransitionManager.singleton.GoToSceneAsync(botao < cenaDoBotao.Length ? cenaDoBotao[botao] : 1);
     }
 
     public void HideAll()

@@ -18,7 +18,6 @@ public static class ConfigurarCenarioTreinamento
     const string Cena = "Assets/Scenes/cena principal.unity";
     const string NomeRaiz = "[TCC] Treinamento";
     const string PastaCenario = "Assets/TCC/Cenario";
-    const string PrefabPessoa = "Assets/3rd Party Plugins/Blink/Art/Characters/LowPoly/FREE_HumanLowPoly/Prefabs_Humans/HumanMale_Character_FREE.prefab";
     const string PastaVeiculos = "Assets/Fantastic City Generator/Traffic System/Vehicles/Prefabs/";
     const float FaixaDireita = 2.5f;
 
@@ -51,8 +50,14 @@ public static class ConfigurarCenarioTreinamento
         var centroAlvo = alvoFixo.transform.position;
         var centro = new Vector3(centroAlvo.x, AlturaDoSolo(centroAlvo), centroAlvo.z - 20f);
 
+        // O trânsito aleatório do FCG não enxerga os alvos e atravessa os carros das rotas
+        var transito = Object.FindFirstObjectByType<TrafficSystem>(FindObjectsInactive.Include);
+        if (transito != null) transito.gameObject.SetActive(false);
+
         var raiz = new GameObject(NomeRaiz);
-        raiz.AddComponent<GerenciadorTreinamento>();
+        var gerenciador = raiz.AddComponent<GerenciadorTreinamento>();
+        gerenciador.efeitoAcerto = RecursosTreinamento.EfeitoAcerto;
+        gerenciador.efeitoErro = RecursosTreinamento.EfeitoErro;
         var area = new GameObject("Area de Treinamento");
         area.transform.SetParent(raiz.transform);
         area.transform.position = centro;
@@ -75,7 +80,7 @@ public static class ConfigurarCenarioTreinamento
 
         var pessoas = new GameObject("Pessoas");
         pessoas.transform.SetParent(raiz.transform);
-        CriarPessoas(6, centroAlvo, pessoas.transform);
+        CriarPessoas(8, centroAlvo, pessoas.transform);
 
         ConfigurarPilotoAutomatico(helicoptero, area.transform);
 
@@ -138,7 +143,7 @@ public static class ConfigurarCenarioTreinamento
         return container;
     }
 
-    static void CriarVeiculo(string modelo, SplineContainer rota, float velocidadeKmh, float posicaoInicial, Transform pai)
+    public static GameObject CriarVeiculo(string modelo, SplineContainer rota, float velocidadeKmh, float posicaoInicial, Transform pai)
     {
         var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PastaVeiculos + modelo + ".prefab");
         var veiculo = (GameObject)PrefabUtility.InstantiatePrefab(prefab, pai);
@@ -165,7 +170,9 @@ public static class ConfigurarCenarioTreinamento
         movimento.rota = rota;
         movimento.velocidadeKmh = velocidadeKmh;
         movimento.posicaoInicial = posicaoInicial;
+        movimento.materialFumaca = RecursosTreinamento.MaterialFumaca();
         veiculo.transform.position = rota.EvaluatePosition(posicaoInicial);
+        return veiculo;
     }
 
     // Veículos estáticos do FCG parados nas faixas seriam atravessados pelos alvos: desativa
@@ -185,49 +192,23 @@ public static class ConfigurarCenarioTreinamento
         }
     }
 
-    // O personagem base do Blink vem só com roupa de baixo; veste as roupas do pacote
-    static void Vestir(GameObject pessoa)
-    {
-        foreach (var t in pessoa.GetComponentsInChildren<Transform>(true))
-        {
-            if (t.name is "Starter_Chest" or "Starter_Pants" or "Starter_Boots") t.gameObject.SetActive(true);
-            if (t.name is "Chest" or "Legs" or "Feet" or "Underwear") t.gameObject.SetActive(false);
-        }
-    }
-
     static void CriarPessoas(int quantidade, Vector3 centroAlvo, Transform pai)
     {
-        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPessoa);
+        var controlador = RecursosTreinamento.ControladorPessoa();
         var aleatorio = new System.Random(42);
-        int criadas = 0;
-        for (int tentativa = 0; tentativa < 200 && criadas < quantidade; tentativa++)
+        var posicoes = new List<Vector3>();
+        for (int tentativa = 0; tentativa < 400 && posicoes.Count < quantidade; tentativa++)
         {
             float angulo = (float)aleatorio.NextDouble() * Mathf.PI * 2f;
-            float distancia = 6f + (float)aleatorio.NextDouble() * 18f;
+            float distancia = 6f + (float)aleatorio.NextDouble() * 22f;
             var candidato = centroAlvo + new Vector3(Mathf.Cos(angulo), 0f, Mathf.Sin(angulo)) * distancia;
             if (!NavMesh.SamplePosition(candidato, out var hit, 3f, NavMesh.AllAreas)) continue;
-
-            var pessoa = (GameObject)PrefabUtility.InstantiatePrefab(prefab, pai);
-            pessoa.name = $"Pessoa {criadas + 1}";
-            Vestir(pessoa);
-            pessoa.transform.SetPositionAndRotation(hit.position, Quaternion.Euler(0f, (float)aleatorio.NextDouble() * 360f, 0f));
-
-            var colisor = pessoa.AddComponent<CapsuleCollider>();
-            colisor.center = new Vector3(0f, 0.9f, 0f);
-            colisor.height = 1.8f;
-            colisor.radius = 0.35f;
-            pessoa.AddComponent<Rigidbody>().isKinematic = true;
-            var agente = pessoa.AddComponent<NavMeshAgent>();
-            agente.radius = 0.35f;
-            agente.height = 1.8f;
-            agente.speed = 5f;
-            agente.angularSpeed = 540f;
-            agente.acceleration = 12f;
-            pessoa.AddComponent<AlvoTreinamento>().tipo = TipoAlvo.Pessoa;
-            pessoa.AddComponent<PessoaEmFuga>();
-            criadas++;
+            // Espalhadas pela praça, não em grupo
+            if (posicoes.Any(p => Vector3.Distance(p, hit.position) < 5f)) continue;
+            posicoes.Add(hit.position);
+            RecursosTreinamento.CriarPessoa(pai, hit.position, aleatorio, controlador).name = $"Pessoa {posicoes.Count}";
         }
-        if (criadas < quantidade) Debug.LogWarning($"[TCC] Só foi possível posicionar {criadas} de {quantidade} pessoas na NavMesh.");
+        if (posicoes.Count < quantidade) Debug.LogWarning($"[TCC] Só foi possível posicionar {posicoes.Count} de {quantidade} pessoas na NavMesh.");
     }
 
     static void ConfigurarPilotoAutomatico(Controller helicoptero, Transform centro)
