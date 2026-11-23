@@ -29,11 +29,33 @@ public static class ModoDesktop
     {
         bool forcado = Environment.GetCommandLineArgs().Contains("-desktop");
         Ativo = forcado || !XRSettings.isDeviceActive;
+        InformarXR(forcado);
         if (!Ativo) return;
 
         // Roda dentro do sceneLoaded, antes do Start dos objetos da cena,
         // para impedir que as mãos peguem o fuzil (AdvancedInitialGrab).
         new GameObject("[Modo Desktop]").AddComponent<ControleDesktop>();
+    }
+
+    static bool informado;
+
+    // Diz no Console, uma vez por execução, qual plugin de VR carregou e se há óculos ativo,
+    // para diagnosticar quando o simulador entra no modo desktop com o óculos conectado
+    static void InformarXR(bool forcado)
+    {
+        if (informado) return;
+        informado = true;
+        var gerente = UnityEngine.XR.Management.XRGeneralSettings.Instance != null ? UnityEngine.XR.Management.XRGeneralSettings.Instance.Manager : null;
+        string carregador = gerente != null && gerente.activeLoader != null ? gerente.activeLoader.name : "nenhum";
+        string dispositivo = string.IsNullOrEmpty(XRSettings.loadedDeviceName) ? "nenhum" : XRSettings.loadedDeviceName;
+        if (XRSettings.isDeviceActive && !forcado)
+            Debug.Log($"[VR] Óculos ativo (carregador: {carregador}, dispositivo: {dispositivo}).");
+        else if (forcado)
+            Debug.Log("[VR] Modo desktop forçado pelo argumento -desktop.");
+        else
+            Debug.LogWarning($"[VR] Nenhum óculos ativo: modo desktop (carregador: {carregador}, dispositivo: {dispositivo}). " +
+                             "Para o PICO pelo Virtual Desktop no Windows, o carregador deve ser o OpenXR (menu TCC → Configurar VR) " +
+                             "e o Virtual Desktop deve estar conectado com o VDXR como runtime OpenXR antes de apertar Play.");
     }
 }
 

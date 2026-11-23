@@ -36,6 +36,19 @@ public static class RedesenharMenu
         Debug.Log("[TCC] Menu inicial redesenhado.");
     }
 
+    // Abre o menu inicial e destaca o arquivo da cena na janela Project (uso: -executeMethod RedesenharMenu.MostrarCena)
+    public static void MostrarCena()
+    {
+        EditorApplication.delayCall += () =>
+        {
+            EditorSceneManager.OpenScene(Cena);
+            var arquivo = AssetDatabase.LoadAssetAtPath<SceneAsset>(Cena);
+            EditorUtility.FocusProjectWindow();
+            Selection.activeObject = arquivo;
+            EditorGUIUtility.PingObject(arquivo);
+        };
+    }
+
     // Só abre a cena do menu inicial no editor (uso: -executeMethod RedesenharMenu.AbrirMenu)
     public static void AbrirMenu()
     {
