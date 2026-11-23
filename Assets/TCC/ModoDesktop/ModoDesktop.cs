@@ -89,8 +89,11 @@ public class ControleDesktop : MonoBehaviour
             if (componente != null && componente.GetType().Name == "TrackedPoseDriver")
                 componente.enabled = false;
 
+        // Só sobe a câmera quando o rig não tem altura nenhuma (no helicóptero); no menu,
+        // o CameraOffset do rig já põe a câmera na altura dos olhos
         var local = cabeca.transform.localPosition;
-        if (local.y < 0.1f)
+        float alturaDoPai = cabeca.transform.parent != null ? cabeca.transform.parent.localPosition.y : 0f;
+        if (local.y < 0.1f && alturaDoPai < 0.5f)
             cabeca.transform.localPosition = new Vector3(local.x, AlturaOlhos, local.z);
 
         var angulos = cabeca.transform.localEulerAngles;
@@ -215,7 +218,9 @@ public class ControleDesktop : MonoBehaviour
         if (mouse.leftButton.wasPressedThisFrame) fuzil.PressTrigger();
         if (mouse.leftButton.wasReleasedThisFrame) fuzil.ReleaseTrigger();
         if (teclado.tKey.wasPressedThisFrame) Recarregar();
-        cabeca.fieldOfView = mouse.rightButton.isPressed ? FovZoom : fovNormal;
+        // Zoom enquanto o botão direito ou a tecla Z estiverem pressionados
+        bool zoom = mouse.rightButton.isPressed || teclado.zKey.isPressed;
+        cabeca.fieldOfView = zoom ? FovZoom : fovNormal;
     }
 
     // Posiciona o fuzil depois da câmera se mover, com o cano apontando para o ponto sob a mira
@@ -325,7 +330,7 @@ public class ControleDesktop : MonoBehaviour
 
         string ajuda = modoTiro
             ? $"MODO DESKTOP (sem óculos)   Munição: {fuzil.GetAmmo()}\n" +
-              "Mouse: mirar | Clique esq.: atirar | Botão dir.: zoom | T: recarregar | H: câmera do helicóptero | Esc: liberar cursor"
+              "Mouse: mirar | Clique esq.: atirar | Botão dir. ou Z: zoom | T: recarregar | H: câmera do helicóptero | Esc: liberar cursor"
             : "MODO DESKTOP (sem óculos)\nSegure o botão direito e mova o mouse para olhar | Clique nos botões do menu";
         GUI.Label(new Rect(10, 10, Screen.width - 20, 40), ajuda);
     }
