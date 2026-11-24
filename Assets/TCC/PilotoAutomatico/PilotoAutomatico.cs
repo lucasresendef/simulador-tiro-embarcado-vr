@@ -379,12 +379,18 @@ public class PilotoAutomatico : MonoBehaviour
 
     static Vector3 Horizontal(Vector3 v) => new Vector3(v.x, 0f, v.z);
 
+    string NomePadrao => padrao switch { Padrao.Orbita => "órbita", Padrao.Linear => "deslocamento linear", Padrao.Acompanhamento => "acompanhamento", _ => "pairado" };
+
+    // Resumo curto do voo, usado pelo painel do óculos
+    public string Resumo => Ligado
+        ? $"Piloto automático: {NomePadrao} a {alturaEfetiva / 0.3048f:F0} ft, {velocidade.magnitude / Nos:F0} kt"
+        : "Piloto automático desligado";
+
     void OnGUI()
     {
-        string nomePadrao = padrao switch { Padrao.Orbita => "órbita", Padrao.Linear => "deslocamento linear", Padrao.Acompanhamento => "acompanhamento", _ => "pairado" };
         string texto = Ligado
-            ? $"PILOTO AUTOMÁTICO: {nomePadrao.ToUpper()} ({alturaEfetiva / 0.3048f:F0} ft, {(padrao == Padrao.Acompanhamento ? "afastamento" : "raio")} {raio:F0} m, {velocidade.magnitude / Nos:F0} kt) | P: desligar | O: trocar padrão"
-            : $"Piloto automático desligado ({nomePadrao}) | P: ligar | O: trocar padrão";
+            ? $"PILOTO AUTOMÁTICO: {NomePadrao.ToUpper()} ({alturaEfetiva / 0.3048f:F0} ft, {(padrao == Padrao.Acompanhamento ? "afastamento" : "raio")} {raio:F0} m, {velocidade.magnitude / Nos:F0} kt) | P: desligar | O: trocar padrão"
+            : $"Piloto automático desligado ({NomePadrao}) | P: ligar | O: trocar padrão";
         if (Ligado && controle.CurrentEngineState != Controller.EngineState.Active) texto += " | aguardando o motor";
         if (!string.IsNullOrEmpty(aviso)) texto += " | " + aviso;
         GUI.Label(new Rect(10, 55, Screen.width - 20, 22), texto);

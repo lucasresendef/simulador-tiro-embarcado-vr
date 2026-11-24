@@ -8,11 +8,12 @@ public class GerenciadorTreinamento : MonoBehaviour
 {
     public static GerenciadorTreinamento Instancia { get; private set; }
 
-    [Tooltip("Efeito no ponto de impacto de um acerto em alvo")]
-    public GameObject efeitoAcerto;
-    [Tooltip("Efeito no ponto de impacto de um disparo que não acertou alvo")]
-    public GameObject efeitoErro;
     public bool mostrarPlacar = true;
+    [Header("Vibração do controle (VR)")]
+    [Tooltip("Pulso a cada disparo: duração (s) e intensidade (0 a 1)")]
+    public Vector2 vibracaoDisparo = new Vector2(0.06f, 0.6f);
+    [Tooltip("Pulso extra ao acertar um alvo: duração (s) e intensidade (0 a 1)")]
+    public Vector2 vibracaoAcerto = new Vector2(0.14f, 1f);
 
     public int Disparos { get; private set; }
     public int AcertosVeiculos { get; private set; }
@@ -40,17 +41,19 @@ public class GerenciadorTreinamento : MonoBehaviour
     void AoDisparar(AutoGun arma)
     {
         Disparos++;
+        Vibrar(arma, vibracaoDisparo);
         var cano = arma.shootForward;
         bool acertou = Physics.Raycast(cano.position, cano.forward, out var hit, arma.maxHitDistance, ~0, QueryTriggerInteraction.Ignore);
-        bool emAlvo = acertou && hit.collider.GetComponentInParent<AlvoTreinamento>() != null;
-        if (efeitos != null) efeitos.Disparo(arma, acertou, hit, emAlvo);
-        if (acertou) Marcar(emAlvo ? efeitoAcerto : efeitoErro, hit);
+        var alvo = acertou ? hit.collider.GetComponentInParent<AlvoTreinamento>() : null;
+        // Um único sistema de efeitos (clarão, traçante e impacto); o impacto também marca os erros
+        if (efeitos != null) efeitos.Disparo(arma, acertou, hit, alvo);
     }
 
     void AoAcertar(AutoGun arma, RaycastHit hit)
     {
         var alvo = hit.collider.GetComponentInParent<AlvoTreinamento>();
         if (alvo == null || !alvo.RegistrarAcerto(hit)) return;
+        Vibrar(arma, vibracaoAcerto);
 
         if (alvo.proibido) AcertosProibidos++;
         else if (alvo.tipo == TipoAlvo.Veiculo) AcertosVeiculos++;
@@ -58,12 +61,13 @@ public class GerenciadorTreinamento : MonoBehaviour
         Debug.Log($"[Treinamento] Acerto em {alvo.name} ({alvo.tipo}{(alvo.proibido ? ", não autorizado" : "")}) a {hit.distance:F0} m, alvo a {alvo.Velocidade.magnitude * 3.6f:F0} km/h.");
     }
 
-    static void Marcar(GameObject efeito, RaycastHit hit)
+    // Vibra o controle da mão que segura o fuzil (sem óculos, ninguém segura e não faz nada)
+    static void Vibrar(AutoGun arma, Vector2 pulso)
     {
-        if (efeito == null) return;
-        var instancia = Instantiate(efeito, hit.point + hit.normal * 0.05f, Quaternion.LookRotation(hit.normal));
-        Destroy(instancia, 3f);
+        var pegavel = arma.GetComponentInParent<Grabbable>();
+        if (pegavel != null && pegavel.IsHeld()) pegavel.PlayHapticVibration(pulso.x, pulso.y);
     }
+
 
     void OnGUI()
     {

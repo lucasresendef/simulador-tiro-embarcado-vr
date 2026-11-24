@@ -235,7 +235,8 @@ public static class RedesenharMenu
         string titulo(string t) => $"<b><color={HexDestaque}>{t}</color></b>";
         string esquerda =
             titulo("Com óculos (VR)") + "\n" +
-            "Segure o fuzil com as mãos e atire pelo gatilho do controle.\n\n" +
+            "Segure o fuzil com as mãos e atire pelo gatilho do controle.\n" +
+            "Recentralizar: G (instrutor) ou os dois analógicos pressionados.\n\n" +
             titulo("Sem óculos (mouse e teclado)") + "\n" +
             "Mouse: mirar\n" +
             "Clique esquerdo: atirar\n" +
@@ -368,7 +369,7 @@ public static class RedesenharMenu
     // Fonte TMP a partir do .ttf do Roboto (licença Apache), com os glifos de Latin-1 já gravados
     // no atlas e modo estático: nada é gerado em tempo de execução (no modo Play, a geração
     // dinâmica falhava em parte das letras, que caíam na fonte reserva itálica)
-    static TMP_FontAsset Fonte(string nome)
+    internal static TMP_FontAsset Fonte(string nome)
     {
         string caminho = $"{PastaFontes}/{nome} SDF TCC.asset";
         var fonte = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(caminho);

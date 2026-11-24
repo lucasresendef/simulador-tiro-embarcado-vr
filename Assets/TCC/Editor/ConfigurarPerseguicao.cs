@@ -55,8 +55,6 @@ public static class ConfigurarPerseguicao
         var faixaVolta = CriarFaixa("Faixa contrária", Enumerable.Reverse(eixo).ToList(), tcc.transform);
 
         var gerenciador = tcc.AddComponent<GerenciadorTreinamento>();
-        gerenciador.efeitoAcerto = RecursosTreinamento.EfeitoAcerto;
-        gerenciador.efeitoErro = RecursosTreinamento.EfeitoErro;
         ConfigurarCenarioTreinamento.AdicionarEfeitos(tcc);
 
         // Suspeito sai 60 m à frente do ponto da rodovia mais próximo do heliponto

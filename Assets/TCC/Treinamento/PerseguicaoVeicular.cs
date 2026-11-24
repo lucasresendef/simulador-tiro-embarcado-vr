@@ -33,14 +33,35 @@ public class PerseguicaoVeicular : MonoBehaviour
 
     static string Tempo(float segundos) => $"{(int)(segundos / 60f):00}:{(int)(segundos % 60f):00}";
 
+    // Situação da perseguição, mostrada no HUD do monitor e no painel do óculos
+    public string Status
+    {
+        get
+        {
+            var alvo = suspeito.GetComponent<AlvoTreinamento>();
+            var placar = GerenciadorTreinamento.Instancia;
+            if (inicio < 0f) return $"PERSEGUIÇÃO: aguardando a aeronave passar de {alturaInicioPes:F0} ft para o suspeito fugir";
+            if (fim < 0f) return $"PERSEGUIÇÃO: suspeito a {suspeito.VelocidadeAtual * 3.6f:F0} km/h | acertos no suspeito: {alvo.Acertos}/{suspeito.acertosParaParar} | tempo {Tempo(Time.time - inicio)}";
+            return $"SUSPEITO NEUTRALIZADO em {Tempo(fim - inicio)} com {placar?.Disparos ?? 0} disparos";
+        }
+    }
+
+    // Versão curta para o painel do óculos
+    public string Resumo
+    {
+        get
+        {
+            var alvo = suspeito.GetComponent<AlvoTreinamento>();
+            if (inicio < 0f) return "Suspeito parado";
+            if (fim < 0f) return $"Suspeito {suspeito.VelocidadeAtual * 3.6f:F0} km/h · {alvo.Acertos}/{suspeito.acertosParaParar}";
+            return $"Suspeito neutralizado em {Tempo(fim - inicio)}";
+        }
+    }
+
     void OnGUI()
     {
-        var alvo = suspeito.GetComponent<AlvoTreinamento>();
-        var placar = GerenciadorTreinamento.Instancia;
-        string texto;
-        if (inicio < 0f) texto = $"PERSEGUIÇÃO: aguardando a aeronave passar de {alturaInicioPes:F0} ft para o suspeito fugir";
-        else if (fim < 0f) texto = $"PERSEGUIÇÃO: suspeito a {suspeito.VelocidadeAtual * 3.6f:F0} km/h | acertos no suspeito: {alvo.Acertos}/{suspeito.acertosParaParar} | tempo {Tempo(Time.time - inicio)}";
-        else texto = $"SUSPEITO NEUTRALIZADO em {Tempo(fim - inicio)} com {placar?.Disparos ?? 0} disparos | R reinicia o cenário";
+        string texto = Status;
+        if (fim >= 0f) texto += " | R reinicia o cenário";
         GUI.Label(new Rect(10, 95, Screen.width - 20, 22), texto);
     }
 }

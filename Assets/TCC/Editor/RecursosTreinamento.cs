@@ -78,13 +78,9 @@ public static class RecursosTreinamento
     {
         var caminho = $"{Pasta}/{nome}.mat";
         var material = AssetDatabase.LoadAssetAtPath<Material>(caminho);
-        if (material != null)
-        {
-            material.SetColor("_BaseColor", cor);
-            EditorUtility.SetDirty(material);
-            return material;
-        }
-        material = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
+        bool novo = material == null;
+        if (novo) material = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
+        // Reaplica as configurações também nos materiais que já existem
         material.SetTexture("_BaseMap", AssetDatabase.GetBuiltinExtraResource<Texture2D>("Default-Particle.psd"));
         material.SetColor("_BaseColor", cor);
         material.SetFloat("_Surface", 1f);
@@ -94,9 +90,10 @@ public static class RecursosTreinamento
         material.SetInt("_DstBlend", (int)(aditivo ? UnityEngine.Rendering.BlendMode.One : UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha));
         material.SetInt("_ZWrite", 0);
         material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-        if (aditivo) material.EnableKeyword("_BLENDMODE_ADD");
+        if (aditivo) material.EnableKeyword("_BLENDMODE_ADD"); else material.DisableKeyword("_BLENDMODE_ADD");
         material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-        AssetDatabase.CreateAsset(material, caminho);
+        if (novo) AssetDatabase.CreateAsset(material, caminho);
+        else EditorUtility.SetDirty(material);
         return material;
     }
 
