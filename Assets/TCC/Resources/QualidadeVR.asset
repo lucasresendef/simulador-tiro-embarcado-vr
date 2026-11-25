@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a53f3de9b4946104aa316287884eb4f5, type: 3}
   m_Name: QualidadeVR
   m_EditorClassIdentifier: Assembly-CSharp::QualidadeVR
-  modo: 1
+  modo: 0
