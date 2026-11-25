@@ -27,14 +27,30 @@ public static class ModoDesktop
 
     static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+#if UNITY_EDITOR
+        // Teste automático da mira de VR (TesteMiraVR): mantém o modo VR mesmo sem óculos
+        if (TesteMiraVR.Ativo) { Ativo = false; Debug.Log("[VR] Teste da mira: modo desktop desligado."); return; }
+#endif
         bool forcado = Environment.GetCommandLineArgs().Contains("-desktop");
-        Ativo = forcado || !XRSettings.isDeviceActive;
+        Ativo = forcado || !OculosDisponivel();
         InformarXR(forcado);
         if (!Ativo) return;
 
         // Roda dentro do sceneLoaded, antes do Start dos objetos da cena,
         // para impedir que as mãos peguem o fuzil (AdvancedInitialGrab).
         new GameObject("[Modo Desktop]").AddComponent<ControleDesktop>();
+    }
+
+    // Há óculos quando um plugin de VR carregou com uma tela de VR. Não basta XRSettings.isDeviceActive:
+    // no OpenXR ele só fica verdadeiro quando a sessão começa a rodar, o que pode acontecer alguns quadros
+    // depois de a cena carregar (ex.: Quest Link, Virtual Desktop). Sem óculos conectado, o OpenXR
+    // falha ao iniciar e não deixa carregador ativo.
+    static bool OculosDisponivel()
+    {
+        if (XRSettings.isDeviceActive) return true;
+        var gerente = UnityEngine.XR.Management.XRGeneralSettings.Instance != null ? UnityEngine.XR.Management.XRGeneralSettings.Instance.Manager : null;
+        if (gerente == null || gerente.activeLoader == null) return false;
+        return gerente.activeLoader.GetLoadedSubsystem<XRDisplaySubsystem>() != null;
     }
 
     static bool informado;
@@ -48,7 +64,7 @@ public static class ModoDesktop
         var gerente = UnityEngine.XR.Management.XRGeneralSettings.Instance != null ? UnityEngine.XR.Management.XRGeneralSettings.Instance.Manager : null;
         string carregador = gerente != null && gerente.activeLoader != null ? gerente.activeLoader.name : "nenhum";
         string dispositivo = string.IsNullOrEmpty(XRSettings.loadedDeviceName) ? "nenhum" : XRSettings.loadedDeviceName;
-        if (XRSettings.isDeviceActive && !forcado)
+        if (OculosDisponivel() && !forcado)
             Debug.Log($"[VR] Óculos ativo (carregador: {carregador}, dispositivo: {dispositivo}).");
         else if (forcado)
             Debug.Log("[VR] Modo desktop forçado pelo argumento -desktop.");

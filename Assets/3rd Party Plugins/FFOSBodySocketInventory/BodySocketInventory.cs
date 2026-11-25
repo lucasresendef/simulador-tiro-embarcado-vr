@@ -20,6 +20,12 @@ public class BodySocketInventory : MonoBehaviour
     private Quaternion _currentHMDRotation;
     void Update()
     {
+        // Nas cenas do TCC o HMD não foi ligado no Inspector: usa a câmera principal (a da cabeça)
+        if (HMD == null)
+        {
+            if (Camera.main == null) return;
+            HMD = Camera.main.gameObject;
+        }
         _currentHMDlocalPosition = HMD.transform.localPosition;
         _currentHMDRotation = HMD.transform.rotation;
         foreach(var bodySocket in bodySockets)

@@ -37,7 +37,9 @@ public static class ConfigurarVR
         Ativar<ValveIndexControllerProfile>(openxr);
         Ativar<HTCViveControllerProfile>(openxr);
         Ativar<KHRSimpleControllerProfile>(openxr);
-        openxr.renderMode = OpenXRSettings.RenderMode.SinglePassInstanced;
+        // Multi-pass: cada olho é desenhado separadamente. No Single Pass Instanced a interface (uGUI:
+        // menu, placar, textos) só aparecia no olho esquerdo; os objetos 3D apareciam nos dois
+        openxr.renderMode = OpenXRSettings.RenderMode.MultiPass;
         EditorUtility.SetDirty(openxr);
         EditorUtility.SetDirty(geral);
         EditorUtility.SetDirty(geral.Manager);

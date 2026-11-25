@@ -101,7 +101,7 @@ public class VeiculoAlvo : MonoBehaviour
                 var relativo = transform.InverseTransformPoint(outro.transform.position);
                 if (relativo.z <= 0f || relativo.z > alcance || Mathf.Abs(relativo.x) > LarguraFaixa) continue;
                 // Dois veículos que se veem no cruzamento: um deles passa primeiro
-                if (outro.bloqueador == this && GetInstanceID() < outro.GetInstanceID()) continue;
+                if (outro.bloqueador == this && GetHashCode() < outro.GetHashCode()) continue;
                 distanciaAFrente = relativo.z;
             }
             if (distanciaAFrente < maisPerto) { maisPerto = distanciaAFrente; bloqueador = outro; }
