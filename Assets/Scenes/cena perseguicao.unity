@@ -4162,13 +4162,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1317293966}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.100188084, y: 0, z: 0, w: 0.99496853}
-  m_LocalPosition: {x: 0.0500002, y: -0.03, z: -0.0030000024}
+  m_LocalRotation: {x: 0.46174863, y: 0, z: 0, w: 0.8870109}
+  m_LocalPosition: {x: 0.0500002, y: -0.03, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1049661772}
-  m_LocalEulerAnglesHint: {x: 11.5, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 55, y: 0, z: 0}
 --- !u!1 &1354295195 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2746873782158635344, guid: 69e48f6cc2e17a34f9aa90ea6e8937b0, type: 3}
@@ -4288,13 +4288,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1393527799}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.100188084, y: 0, z: 0, w: 0.99496853}
+  m_LocalRotation: {x: 0.46174863, y: 0, z: 0, w: 0.8870109}
   m_LocalPosition: {x: -0.05000019, y: -0.03, z: -0.0029999986}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1049661771}
-  m_LocalEulerAnglesHint: {x: 11.5, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 55, y: 0, z: 0}
 --- !u!224 &1498307687 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 224331479374923600, guid: a6ec557ed27728346ae7045860cf297c, type: 3}
@@ -4635,7 +4635,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
   m_UseReflectionProbes: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -13292,7 +13292,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -16109,7 +16109,7 @@ Camera:
   m_GameObject: {fileID: 1055072652153233}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
+  m_ClearFlags: 4
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
